@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<ApplicationIcon>applicationIcon.ico</ApplicationIcon>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="WPF-UI" Version="4.0.3" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Content Include="applicationIcon.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Assets\applicationIcon-1024.png" />
+		<None Remove="Assets\applicationIcon-256.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Assets\applicationIcon-1024.png" />
+		<Resource Include="Assets\applicationIcon-256.png" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ElitePiracyTracker\ElitePiracyTracker.csproj" />
+  </ItemGroup>
+
+</Project>
