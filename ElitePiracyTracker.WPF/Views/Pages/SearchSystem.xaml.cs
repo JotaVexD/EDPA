@@ -35,7 +35,8 @@ namespace ElitePiracyTracker.WPF.Views.Pages
 
             // Load previous state
             ReferenceSystemTextBox.Text = ApplicationStateService.Instance.ReferenceSystem;
-            MaxDistanceTextBox.Text = ApplicationStateService.Instance.MaxDistance.ToString();
+
+            MaxDistanceSlider.Value = ApplicationStateService.Instance.MaxDistance;
 
             // Set up the sorted results view
             _resultsView = CollectionViewSource.GetDefaultView(ApplicationStateService.Instance.SearchResults);
@@ -129,7 +130,8 @@ namespace ElitePiracyTracker.WPF.Views.Pages
 
                 // Save search parameters
                 ApplicationStateService.Instance.ReferenceSystem = ReferenceSystemTextBox.Text;
-                ApplicationStateService.Instance.MaxDistance = int.Parse(MaxDistanceTextBox.Text);
+                int maxDistance = (int)MaxDistanceSlider.Value;
+                ApplicationStateService.Instance.MaxDistance = maxDistance;
 
                 // Clear previous results
                 ApplicationStateService.Instance.SearchResults.Clear();
@@ -142,11 +144,8 @@ namespace ElitePiracyTracker.WPF.Views.Pages
                     return;
                 }
 
-                if (!int.TryParse(MaxDistanceTextBox.Text, out int maxDistance) || maxDistance <= 0)
-                {
-                    await ShowUiMessageAsync("Input Error", "Please enter a valid maximum distance.", "OK");
-                    return;
-                }
+                // No need to parse since we're using a slider with fixed range
+                StatusLabel.Text = $"Searching for systems near {referenceSystem} (within {maxDistance} ly)...";
 
                 // Use the SpanshSystemSearch class to get complete system data
                 var systems = await _spanshSearcher.SearchSystemsNearReference(referenceSystem, maxDistance);
@@ -248,7 +247,7 @@ namespace ElitePiracyTracker.WPF.Views.Pages
             SearchButton.IsEnabled = enabled;
             ExportButton.IsEnabled = enabled && _currentResults.Count > 0;
             ReferenceSystemTextBox.IsEnabled = enabled;
-            MaxDistanceTextBox.IsEnabled = enabled;
+            MaxDistanceSlider.IsEnabled = enabled;
             ClearResultsButton.IsEnabled = enabled && _currentResults.Count > 0;
         }
 
@@ -264,14 +263,13 @@ namespace ElitePiracyTracker.WPF.Views.Pages
             {
                 // Save current state before navigating away
                 ApplicationStateService.Instance.ReferenceSystem = ReferenceSystemTextBox.Text;
-                if (int.TryParse(MaxDistanceTextBox.Text, out int maxDistance))
-                {
-                    ApplicationStateService.Instance.MaxDistance = maxDistance;
-                }
-                
+
+                // Save slider value
+                ApplicationStateService.Instance.MaxDistance = (int)MaxDistanceSlider.Value;
+
                 // Navigate to the system details page
                 var systemDetailsPage = new SystemDetailsPage(selectedResult);
-                
+
                 // Use the navigation service if available
                 if (NavigationService != null)
                 {

@@ -109,13 +109,22 @@
             <!-- Max Distance -->
             <StackPanel Grid.Column="1" Margin="0,0,16,0">
                 <TextBlock Text="Max Distance (LY)" 
-                           Margin="0,0,0,4"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource FallbackForeground}"/>
-                <ui:TextBox x:Name="MaxDistanceTextBox" 
-                            Text="10" 
-                            Width="80"
-                            Height="32"/>
+                   Margin="0,0,0,4"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource FallbackForeground}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="32">
+                    <Slider x:Name="MaxDistanceSlider" 
+                        Minimum="1" 
+                        Maximum="30" 
+                        Width="80"
+                        Value="10"
+                        VerticalAlignment="Center"
+                        Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding Value, ElementName=MaxDistanceSlider, StringFormat={}{0:F0} ly}" 
+                   VerticalAlignment="Center"
+                   Foreground="{StaticResource FallbackForeground}"
+                   Width="40"/>
+                </StackPanel>
             </StackPanel>
 
             <!-- Buttons -->
