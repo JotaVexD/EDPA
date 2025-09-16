@@ -41,7 +41,7 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 *.vsidx
-CopilotIndices/
+.vs/
 
 # MSBuild Binary and Structured Log
 *.binlog
