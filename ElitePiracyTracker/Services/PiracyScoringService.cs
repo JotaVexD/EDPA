@@ -1,31 +1,27 @@
 ﻿using ElitePiracyTracker.Models;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http;
-using System.Numerics;
 using System.Threading.Tasks;
-using System.Threading.Tasks;
-using static EliteAPI.Events.MarketEvent;
 
 namespace ElitePiracyTracker.Services
 {
-
     public class PiracyScoringService
     {
         private readonly PiracyScoringConfig _config;
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly EDSMService _edsmService;
+        private readonly SpanshSystemSearch _spanshSearcher;
+        private readonly Dictionary<string, SystemData> _systemCache = new Dictionary<string, SystemData>();
+        private readonly Dictionary<string, PiracyScoreResult> _resultCache = new Dictionary<string, PiracyScoreResult>();
 
-        public PiracyScoringService(IConfiguration configuration, HttpClient httpClient, EDSMService edsmService)
+        public PiracyScoringService(IConfiguration configuration, HttpClient httpClient, EDSMService edsmService, SpanshSystemSearch spanshSearcher)
         {
             _edsmService = edsmService;
+            _spanshSearcher = spanshSearcher;
 
             // Load scoring configuration
             _config = new PiracyScoringConfig();
@@ -41,25 +37,125 @@ namespace ElitePiracyTracker.Services
             _config.ValuableCommodities = scoringParams.GetSection("ValuableCommodities").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
         }
 
-        public async Task<PiracyScoreResult> CalculateSystemScore(string systemName)
+        public async Task<PiracyScoreResult> CalculateSystemScore(string systemName = null, SystemData systemData = null)
         {
-            // Get complete system data with a single call
-            var systemData = await _edsmService.GetCompleteSystemData(systemName);
+            // If we don't have system data, try to get it
+            if (systemData == null && !string.IsNullOrEmpty(systemName))
+            {
+                // Check cache first
+                if (_resultCache.TryGetValue(systemName, out var cachedResult))
+                {
+                    return cachedResult;
+                }
 
-            var result = new PiracyScoreResult { SystemName = systemName };
+                // Check system data cache
+                if (!_systemCache.TryGetValue(systemName, out systemData))
+                {
+                    // First try to get data from Spansh
+                    var systems = await _spanshSearcher.SearchSystemsNearReference(systemName, 0, 1);
+                    systemData = systems?.FirstOrDefault(s => s.Name.Equals(systemName, StringComparison.OrdinalIgnoreCase));
 
-            // Calculate all component scores
+                    // If not found in Spansh, fall back to EDSM
+                    if (systemData == null)
+                    {
+                        systemData = await _edsmService.GetCompleteSystemData(systemName);
+                    }
+
+                    if (systemData == null)
+                    {
+                        return null;
+                    }
+
+                    // Cache the system data
+                    _systemCache[systemName] = systemData;
+                }
+            }
+
+            if (systemData == null)
+            {
+                return null;
+            }
+
+            var result = new PiracyScoreResult { SystemName = systemData.Name };
+
+            // Calculate all component scores except market demand
             result.EconomyScore = CalculateEconomyScore(systemData.Economy, systemData.SecondEconomy) * _config.EconomyScoreWeight;
-            result.NoRingsScore = CalculateNoRingsScore(systemData.Rings, systemData.Planets) * _config.NoRingsScoreWeight;
+            result.NoRingsScore = CalculateNoRingsScore(systemData) * _config.NoRingsScoreWeight;
             result.GovernmentScore = CalculateGovernmentScore(systemData.Government) * _config.GovernmentScoreWeight;
             result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
             result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
-            result.MarketDemandScore = CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
+
+            // Calculate score without market demand
+            double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
+                                       result.GovernmentScore + result.SecurityScore +
+                                       result.FactionStateScore;
+
+            // Scale to 0-100 for comparison
+            double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
+
+            // Only calculate market demand if the score is already 70+
+            if (scoreWithoutMarketScaled >= 70)
+            {
+                result.SkippedMarket = false;
+                result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
+            }
+            else
+            {
+                result.SkippedMarket = true;
+                result.MarketDemandScore = 0;
+            }
 
             // Calculate final score
-            result.FinalScore = Math.Round(result.EconomyScore + result.NoRingsScore +
-                                         result.GovernmentScore +result.SecurityScore +
-                                         result.FactionStateScore + result.MarketDemandScore, 2);
+            result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2);
+
+            // Cache the result if we have a system name
+            if (!string.IsNullOrEmpty(systemName))
+            {
+                _resultCache[systemName] = result;
+            }
+
+            return result;
+        }
+
+        // Add this method to your PiracyScoringService class
+        public async Task<PiracyScoreResult> CalculateSystemScoreFromData(SystemData systemData)
+        {
+            if (systemData == null)
+            {
+                return null;
+            }
+
+            var result = new PiracyScoreResult { SystemName = systemData.Name };
+
+            // Calculate all component scores except market demand
+            result.EconomyScore = CalculateEconomyScore(systemData.Economy, systemData.SecondEconomy) * _config.EconomyScoreWeight;
+            result.NoRingsScore = CalculateNoRingsScore(systemData) * _config.NoRingsScoreWeight;
+            result.GovernmentScore = CalculateGovernmentScore(systemData.Government) * _config.GovernmentScoreWeight;
+            result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
+            result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
+
+            // Calculate score without market demand
+            double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
+                                       result.GovernmentScore + result.SecurityScore +
+                                       result.FactionStateScore;
+
+            // Scale to 0-100 for comparison
+            double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
+
+            // Only calculate market demand if the score is already 70+
+            if (scoreWithoutMarketScaled >= 70)
+            {
+                result.SkippedMarket = false;
+                result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
+            }
+            else
+            {
+                result.SkippedMarket = true;
+                result.MarketDemandScore = 0;
+            }
+
+            // Calculate final score
+            result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2);
 
             return result;
         }
@@ -87,11 +183,14 @@ namespace ElitePiracyTracker.Services
             return (primary * 0.7) + (secondary * 0.3);
         }
 
-        private double CalculateNoRingsScore(List<Ring> rings, List<Planet> planets)
+        private double CalculateNoRingsScore(SystemData systemData)
         {
-            // Check for rings and asteroid belts
-            bool hasRings = rings.Count > 0;
-            bool hasBeltClusters = planets.Any(p => p.Type != null && p.Type.Equals("Belt Cluster", StringComparison.OrdinalIgnoreCase));
+            // Check for rings
+            bool hasRings = systemData.Rings.Count > 0;
+
+            // Check for asteroid belts (Belt Cluster planets)
+            bool hasBeltClusters = systemData.Planets.Any(p => p.Type != null &&
+                p.Type.Equals("Belt Cluster", StringComparison.OrdinalIgnoreCase));
 
             // No rings or belts = good for piracy (score of 1.0)
             return (!hasRings && !hasBeltClusters) ? 1.0 : 0.0;
@@ -137,23 +236,35 @@ namespace ElitePiracyTracker.Services
             return 0.3;
         }
 
-        private double CalculateMarketDemandScore(SystemData systemData)
+        private async Task<double> CalculateMarketDemandScore(SystemData systemData)
         {
-            if (systemData.BestCommoditie.Count == 0) return 0;
+            if (systemData.Stations.Count == 0) return 0;
 
             double bestScore = 0;
 
-            foreach (var commodity in systemData.BestCommoditie)
+            // Get market data for each station with a market
+            foreach (var station in systemData.Stations.Where(s => s.HaveMarket && s.MarketId > 0))
             {
-                if (_config.ValuableCommodities.TryGetValue(commodity.Name, out double multiplier))
+                var marketData = await _edsmService.GetMarketData(station.MarketId);
+                if (marketData != null && marketData.Commodities != null)
                 {
-                    if (multiplier > bestScore)
-                        bestScore = multiplier;
+                    foreach (var commodity in marketData.Commodities)
+                    {
+                        _config.DemandThresholds.TryGetValue("High", out var thresholds);
+
+                        if (_config.ValuableCommodities.ContainsKey(commodity.Name) && commodity.Demand >= thresholds)
+                        {
+                            if (_config.ValuableCommodities.TryGetValue(commodity.Name, out double multiplier))
+                            {
+                                if (multiplier > bestScore)
+                                    bestScore = multiplier;
+                            }
+                        }
+                    }
                 }
             }
 
             return bestScore;
         }
-
     }
 }

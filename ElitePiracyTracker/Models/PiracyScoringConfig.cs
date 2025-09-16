@@ -26,7 +26,9 @@
         public double SecurityScore { get; set; }
         public double FactionStateScore { get; set; }
         public double MarketDemandScore { get; set; }
+        public bool SkippedMarket { get; set; }
         public double FinalScore { get; set; }
+
 
 
         public override string ToString()
@@ -37,7 +39,7 @@
                    $"  Government: {GovernmentScore:F2}\n" +
                    $"  Security: {SecurityScore:F2}\n" +
                    $"  Faction State: {FactionStateScore:F2}\n" +
-                   $"  Market Demand: {MarketDemandScore:F2}";
+                   $"  Market Demand: {(MarketDemandScore == 0 ? "Skipped" : MarketDemandScore.ToString("F2"))}";
         }
     }
 }

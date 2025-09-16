@@ -1,5 +1,4 @@
-﻿using static System.Collections.Specialized.BitVector32;
-
+﻿// Models/SystemModels.cs
 namespace ElitePiracyTracker.Models
 {
     public class SystemData

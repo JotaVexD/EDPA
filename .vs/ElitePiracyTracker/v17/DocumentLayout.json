@@ -3,36 +3,52 @@
   "WorkspaceRootPath": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\models\\piracyscoringconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\models\\piracyscoringconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\models\\edsm\\edsmresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\models\\edsm\\edsmresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\services\\piracyscoringservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\services\\piracyscoringservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\models\\piracyscoringconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\models\\piracyscoringconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\config\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\config\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\utilities\\apihelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\utilities\\apihelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\models\\systemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\models\\systemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\models\\edsm\\edsmresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\models\\edsm\\edsmresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\services\\spanshsystemseach.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\services\\spanshsystemseach.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\services\\edsmservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\services\\edsmservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\models\\systemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\models\\systemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\utilities\\apihelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\utilities\\apihelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|c:\\users\\jjoao\\source\\repos\\elitepiracytracker\\elitepiracytracker\\elitepiracytracker.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1C2BDDBE-378F-41C0-883A-56455F425BD6}|ElitePiracyTracker\\ElitePiracyTracker.csproj|solutionrelative:elitepiracytracker\\elitepiracytracker.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,47 +58,81 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "EDSMResponse.cs",
               "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Models\\EDSM\\EDSMResponse.cs",
               "RelativeDocumentMoniker": "ElitePiracyTracker\\Models\\EDSM\\EDSMResponse.cs",
               "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Models\\EDSM\\EDSMResponse.cs",
               "RelativeToolTip": "ElitePiracyTracker\\Models\\EDSM\\EDSMResponse.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAMYAAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAALsAAAAAAAAAAAAuwN4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T04:04:35.456Z",
+              "WhenOpened": "2025-09-16T04:28:53.377Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 7,
+              "Title": "SpanshSystemSeach.cs",
+              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Services\\SpanshSystemSeach.cs",
+              "RelativeDocumentMoniker": "ElitePiracyTracker\\Services\\SpanshSystemSeach.cs",
+              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Services\\SpanshSystemSeach.cs",
+              "RelativeToolTip": "ElitePiracyTracker\\Services\\SpanshSystemSeach.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAAADwAAABSAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-16T03:03:01.212Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Program.cs",
+              "RelativeDocumentMoniker": "ElitePiracyTracker\\Program.cs",
+              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Program.cs",
+              "RelativeToolTip": "ElitePiracyTracker\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T03:08:51.524Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "PiracyScoringConfig.cs",
               "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Models\\PiracyScoringConfig.cs",
               "RelativeDocumentMoniker": "ElitePiracyTracker\\Models\\PiracyScoringConfig.cs",
               "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Models\\PiracyScoringConfig.cs",
               "RelativeToolTip": "ElitePiracyTracker\\Models\\PiracyScoringConfig.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAIwCUAAAA4AAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAA4wBwAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-15T04:55:08.386Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 4,
               "Title": "SystemData.cs",
               "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Models\\SystemData.cs",
               "RelativeDocumentMoniker": "ElitePiracyTracker\\Models\\SystemData.cs",
               "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Models\\SystemData.cs",
               "RelativeToolTip": "ElitePiracyTracker\\Models\\SystemData.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-15T04:23:12.632Z",
               "EditorCaption": ""
@@ -90,51 +140,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Program.cs",
-              "RelativeDocumentMoniker": "ElitePiracyTracker\\Program.cs",
-              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Program.cs",
-              "RelativeToolTip": "ElitePiracyTracker\\Program.cs",
-              "ViewState": "AgIAAD8AAAAAAAAAAAApwFUAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T03:08:51.524Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Config\\appsettings.json",
               "RelativeDocumentMoniker": "ElitePiracyTracker\\Config\\appsettings.json",
               "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Config\\appsettings.json",
               "RelativeToolTip": "ElitePiracyTracker\\Config\\appsettings.json",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABMAAAAYAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-09-15T03:07:57.885Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ApiHelpers.cs",
-              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
-              "RelativeDocumentMoniker": "ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
-              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
-              "RelativeToolTip": "ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T02:48:11.439Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "PiracyScoringService.cs",
               "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Services\\PiracyScoringService.cs",
               "RelativeDocumentMoniker": "ElitePiracyTracker\\Services\\PiracyScoringService.cs",
               "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Services\\PiracyScoringService.cs",
               "RelativeToolTip": "ElitePiracyTracker\\Services\\PiracyScoringService.cs",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAqwDsAAABWAAAAAAAAAA==",
+              "ViewState": "AgIAAHgAAAAAAAAAAAA5wJMAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-15T02:45:48.364Z",
               "EditorCaption": ""
@@ -142,15 +166,65 @@
             {
               "$type": "Document",
               "DocumentIndex": 6,
+              "Title": "MainForm.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\MainForm.Designer.cs",
+              "RelativeDocumentMoniker": "ElitePiracyTracker\\MainForm.Designer.cs",
+              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\MainForm.Designer.cs",
+              "RelativeToolTip": "ElitePiracyTracker\\MainForm.Designer.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAqwC8AAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T11:12:22.253Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\MainForm.cs",
+              "RelativeDocumentMoniker": "ElitePiracyTracker\\MainForm.cs",
+              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\MainForm.cs",
+              "RelativeToolTip": "ElitePiracyTracker\\MainForm.cs",
+              "ViewState": "AgIAAJAAAAAAAAAAAAAawKwAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T11:03:23.963Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "EDSMService.cs",
               "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Services\\EDSMService.cs",
               "RelativeDocumentMoniker": "ElitePiracyTracker\\Services\\EDSMService.cs",
               "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Services\\EDSMService.cs",
               "RelativeToolTip": "ElitePiracyTracker\\Services\\EDSMService.cs",
-              "ViewState": "AgIAAEkBAAAAAAAAAAApwF8BAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAC0BAAAAAAAAAAAgwFgBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-15T02:45:38.745Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ElitePiracyTracker.csproj",
+              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\ElitePiracyTracker.csproj",
+              "RelativeDocumentMoniker": "ElitePiracyTracker\\ElitePiracyTracker.csproj",
+              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\ElitePiracyTracker.csproj",
+              "RelativeToolTip": "ElitePiracyTracker\\ElitePiracyTracker.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-15T11:10:45.628Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ApiHelpers.cs",
+              "DocumentMoniker": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
+              "RelativeDocumentMoniker": "ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
+              "ToolTip": "C:\\Users\\jjoao\\source\\repos\\ElitePiracyTracker\\ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
+              "RelativeToolTip": "ElitePiracyTracker\\Utilities\\ApiHelpers.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAADYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T02:48:11.439Z"
             }
           ]
         }
