@@ -1,4 +1,6 @@
 ﻿// Models/SystemModels.cs
+using ElitePiracyTracker.Models.EDSM;
+
 namespace ElitePiracyTracker.Models
 {
     public class SystemData
@@ -14,12 +16,14 @@ namespace ElitePiracyTracker.Models
         public string FactionState { get; set; }
         public TrafficData TrafficData { get; set; }
         public List<Ring> Rings { get; set; } = new List<Ring>();
+        public List<MinorFactionPresences> MinorFactionPresences { get; set; } = new List<MinorFactionPresences>();
         public List<Planet> Planets { get; set; } = new List<Planet>();
         public List<Station> Stations { get; set; } = new List<Station>();
         public List<CommodityMarket> CommodityMarkets { get; set; } = new List<CommodityMarket>();
         public List<CommodityMarket> BestCommoditie { get; set; } = new List<CommodityMarket>();
         public int TotalDemand { get; set; }
         public int ValuableCommodityDemand { get; set; }
+
     }
 
     public class Station
@@ -35,6 +39,13 @@ namespace ElitePiracyTracker.Models
         public bool HaveMarket { get; set; }
         public bool HaveShipyard { get; set; }
         public string ControllingFaction { get; set; }
+    }
+
+    public class MinorFactionPresences
+    {
+        public double Influence {  get; set; }
+        public string Name { get; set; }
+        public string State { get; set; }
     }
 
     public class CommodityMarket
@@ -70,4 +81,5 @@ namespace ElitePiracyTracker.Models
         public bool HasRings { get; set; }
         public double DistanceFromArrivalLS { get; set; }
     }
+
 }

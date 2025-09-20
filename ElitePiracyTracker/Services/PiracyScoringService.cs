@@ -1,4 +1,5 @@
 ﻿using ElitePiracyTracker.Models;
+using ElitePiracyTracker.Models.EDSM;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -85,6 +86,13 @@ namespace ElitePiracyTracker.Services
             result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
             result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
 
+            result.HasIndustrialEconomy = systemData.Economy == "Industrial";
+            result.HasExtractionEconomy = systemData.Economy == "Extraction";
+            result.HasNoRings = systemData.Rings.Count == 0;
+            result.HasAnarchyGovernment = systemData.Government == "Anarchy";
+            result.HasLowSecurity = systemData.Security == "Low" || systemData.Security == "None" || systemData.Security == "Anarchy";
+            result.HasPirateFaction = systemData.MinorFactionPresences.Any(f => f.Name.Contains("Pirate") || f.Name.Contains("Criminal"));
+
             // Calculate score without market demand
             double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
                                        result.GovernmentScore + result.SecurityScore +
@@ -94,7 +102,7 @@ namespace ElitePiracyTracker.Services
             double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
 
             // Only calculate market demand if the score is already 70+
-            if (scoreWithoutMarketScaled >= 70)
+            if (scoreWithoutMarketScaled >= 60)
             {
                 result.SkippedMarket = false;
                 result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
@@ -107,6 +115,9 @@ namespace ElitePiracyTracker.Services
 
             // Calculate final score
             result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2);
+
+            // Get Best Commodity for display
+            result.BestCommodity = GetBestCommoditySimple(systemData);
 
             // Cache the result if we have a system name
             if (!string.IsNullOrEmpty(systemName))
@@ -134,6 +145,13 @@ namespace ElitePiracyTracker.Services
             result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
             result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
 
+            result.HasIndustrialEconomy = systemData.Economy == "Industrial";
+            result.HasExtractionEconomy = systemData.Economy == "Extraction";
+            result.HasNoRings = systemData.Rings.Count == 0;
+            result.HasAnarchyGovernment = systemData.Government == "Anarchy";
+            result.HasLowSecurity = systemData.Security == "Low" || systemData.Security == "None" || systemData.Security == "Anarchy";
+            result.HasPirateFaction = systemData.MinorFactionPresences.Any(f => f.Name.Contains("Pirate") || f.Name.Contains("Criminal"));
+
             // Calculate score without market demand
             double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
                                        result.GovernmentScore + result.SecurityScore +
@@ -153,6 +171,8 @@ namespace ElitePiracyTracker.Services
                 result.SkippedMarket = true;
                 result.MarketDemandScore = 0;
             }
+
+            result.BestCommodity = GetBestCommoditySimple(systemData);
 
             // Calculate final score
             result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2);
@@ -236,6 +256,25 @@ namespace ElitePiracyTracker.Services
             return 0.3;
         }
 
+        public CommodityMarket GetBestCommoditySimple(SystemData systemData)
+        {
+            var bestCommodity = new CommodityMarket();
+            foreach (var commodities in systemData.BestCommoditie)
+            {
+                if (commodities == null)
+                    return null;
+
+                if (commodities.Demand > bestCommodity.Demand)
+                {
+                    bestCommodity = commodities;
+                }
+
+            }
+
+            return bestCommodity;
+        }
+
+
         private async Task<double> CalculateMarketDemandScore(SystemData systemData)
         {
             if (systemData.Stations.Count == 0) return 0;
@@ -256,8 +295,21 @@ namespace ElitePiracyTracker.Services
                         {
                             if (_config.ValuableCommodities.TryGetValue(commodity.Name, out double multiplier))
                             {
+                                systemData.BestCommoditie.Add(new CommodityMarket
+                                {
+                                    Name = commodity.Name,
+                                    BuyPrice = commodity.BuyPrice,
+                                    SellPrice = commodity.SellPrice,
+                                    Demand = commodity.Demand,
+                                    Stock = commodity.Stock,
+                                    DemandBracket = commodity.DemandBracket,
+                                    StockBracket = commodity.StockBracket
+                                });
+
                                 if (multiplier > bestScore)
+                                {
                                     bestScore = multiplier;
+                                }
                             }
                         }
                     }
@@ -265,6 +317,20 @@ namespace ElitePiracyTracker.Services
             }
 
             return bestScore;
+        }
+
+        public List<CommodityMarket> ConvertEdsmCommoditiesToCommodityMarkets(List<EDSMCommodity> edsmCommodities)
+        {
+            return edsmCommodities.Select(edsmCommodity => new CommodityMarket
+            {
+                Name = edsmCommodity.Name,
+                BuyPrice = edsmCommodity.BuyPrice,
+                SellPrice = edsmCommodity.SellPrice,
+                Demand = edsmCommodity.Demand,
+                Stock = edsmCommodity.Stock,
+                DemandBracket = edsmCommodity.DemandBracket,
+                StockBracket = edsmCommodity.StockBracket
+            }).ToList();
         }
     }
 }

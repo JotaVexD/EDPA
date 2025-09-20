@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ElitePiracyTracker.Models;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Numerics;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ElitePiracyTracker.Models;
 
 namespace ElitePiracyTracker.Services
 {
@@ -292,7 +293,34 @@ namespace ElitePiracyTracker.Services
                 }
             }
 
+            if (systemElement.TryGetProperty("minor_faction_presences", out var minorFactionPresenceElement) && minorFactionPresenceElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var faction in minorFactionPresenceElement.EnumerateArray())
+                {
+                    
+                    var minorFaction = new MinorFactionPresences();
+
+                    if (faction.TryGetProperty("name", out var minorFactionNameElement))
+                    {
+                        minorFaction.Name = minorFactionNameElement.GetString();
+                    }
+
+                    if (faction.TryGetProperty("state", out var minorFactionStateElement))
+                    {
+                        minorFaction.State = factionStateElement.GetString();
+                    }
+
+                    if (faction.TryGetProperty("influence", out var minorFactionInfluenceElement))
+                    {
+                        minorFaction.Influence = minorFactionInfluenceElement.GetDouble();
+                    }
+
+                    systemData.MinorFactionPresences.Add(minorFaction);
+                }
+            }
+
             return systemData;
         }
+
     }
 }

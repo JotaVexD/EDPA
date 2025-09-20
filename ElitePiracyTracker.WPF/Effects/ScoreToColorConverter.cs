@@ -11,11 +11,10 @@ namespace ElitePiracyTracker.WPF.Effects
         {
             if (value is double score)
             {
-                // Use Fluent UI colors for consistency
-                if (score >= 90) return new SolidColorBrush(Color.FromRgb(16, 124, 16));    // Green
-                if (score >= 80) return new SolidColorBrush(Color.FromRgb(0, 99, 177));     // Blue
-                if (score >= 70) return new SolidColorBrush(Color.FromRgb(202, 133, 0));    // Yellow/Orange
-                return new SolidColorBrush(Color.FromRgb(196, 43, 28));                     // Red
+                if (score >= 85) return new SolidColorBrush(Color.FromRgb(76, 175, 80)); // Green
+                if (score >= 65) return new SolidColorBrush(Color.FromRgb(255, 193, 7));  // Amber
+                if (score >= 45) return new SolidColorBrush(Color.FromRgb(255, 152, 0));  // Orange
+                return new SolidColorBrush(Color.FromRgb(244, 67, 54));                   // Red
             }
             return new SolidColorBrush(Colors.Gray);
         }

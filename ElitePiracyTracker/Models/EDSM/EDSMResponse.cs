@@ -9,7 +9,7 @@ namespace ElitePiracyTracker.Models.EDSM
 {
     using System.Collections.Generic;
     using Newtonsoft.Json;
-
+    
     public class EDSMSystemResponse
     {
         [JsonProperty("name")]
@@ -219,4 +219,5 @@ namespace ElitePiracyTracker.Models.EDSM
         [JsonProperty("stockBracket")]
         public int StockBracket { get; set; }
     }
+
 }

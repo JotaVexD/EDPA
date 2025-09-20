@@ -5,37 +5,100 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:converters="clr-namespace:ElitePiracyTracker.WPF.Effects"
+    xmlns:local="clr-namespace:ElitePiracyTracker.WPF.Config"
     Title="System Details"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
 
-    <Grid>
+    <Page.Resources>
+        <converters:ScoreToColorConverter x:Key="ScoreToColorConverter"/>
+        <local:ScoreToStarVisibilityConverter x:Key="ScoreToStarVisibilityConverter"/>
+        <local:WeightedScoreToPercentageConverter x:Key="WeightedScoreToPercentageConverter"/>
+
+        <!-- Fallback brushes -->
+        <SolidColorBrush x:Key="FallbackBackground" Color="#2B2B2B"/>
+        <SolidColorBrush x:Key="FallbackForeground" Color="#BFBFBF"/>
+        <SolidColorBrush x:Key="FallbackSecondaryText" Color="#D6D6D6"/>
+        <SolidColorBrush x:Key="FallbackBorder" Color="#454545"/>
+        <SolidColorBrush x:Key="FallbackCardBackground" Color="#383838"/>
+
+        <!-- Style for section headers -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Foreground" Value="{StaticResource FallbackForeground}"/>
+        </Style>
+
+        <!-- Style for label text -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Foreground" Value="{StaticResource FallbackForeground}"/>
+        </Style>
+
+        <!-- Style for value text -->
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Foreground" Value="{StaticResource FallbackSecondaryText}"/>
+        </Style>
+
+        <!-- Style for score value text -->
+        <Style x:Key="ScoreValueStyle" TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- Style for recommendation text -->
+        <Style x:Key="RecommendationStyle" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,8,0,0"/>
+            <Setter Property="Foreground" Value="{StaticResource FallbackForeground}"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource FallbackBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Navigation Header -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16" VerticalAlignment="Center">
-            <ui:Button 
-                Icon="{ui:SymbolIcon ArrowLeft24}"
-                Content="Back to Search"
-                Click="BackButton_Click"
-                Margin="0,0,16,0"/>
-            <TextBlock 
-                Text="{Binding SystemName, StringFormat='System Search → {0}'}"
-                FontSize="18"
-                FontWeight="SemiBold"
-                VerticalAlignment="Center"/>
-        </StackPanel>
+        <Border Grid.Row="0" Background="{StaticResource FallbackCardBackground}" Padding="16,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ui:Button 
+                    Icon="{ui:SymbolIcon ArrowLeft24}"
+                    Content="Back to Search"
+                    Click="BackButton_Click"
+                    Margin="0,0,16,0"
+                    Appearance="Secondary"/>
+                <TextBlock 
+                    Text="{Binding SystemName, StringFormat='System Details: {0}'}"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource FallbackForeground}"/>
+            </StackPanel>
+        </Border>
 
         <!-- System Details Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="16">
-                <ui:CardControl Margin="0,0,0,16">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16">
+            <StackPanel>
+                <!-- Basic Information Card -->
+                <Border Background="{StaticResource FallbackCardBackground}" 
+                        CornerRadius="4" 
+                        Padding="16"
+                        Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="Basic Information" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:SymbolIcon Symbol="Info24" 
+                                          Foreground="{StaticResource FallbackForeground}"
+                                          Margin="0,0,8,0"/>
+                            <TextBlock Text="Basic Information" Style="{StaticResource SectionHeaderStyle}"/>
+                        </StackPanel>
 
                         <Grid>
                             <Grid.RowDefinitions>
@@ -47,26 +110,53 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="System Name:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,8"/>
-                            <TextBlock Text="{Binding SystemName}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"/>
+                            <TextBlock Text="System Name:" Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Text="{Binding SystemName}" Grid.Row="0" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-                            <TextBlock Text="Final Score:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,8"/>
-                            <TextBlock Text="{Binding FinalScore, StringFormat={}{0:F0}}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"/>
+                            <TextBlock Text="Final Score:" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Grid.Row="1" Grid.Column="2" 
+                                    Background="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                    CornerRadius="12"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Padding="12,4"
+                                    Margin="0,0,8,4">
+                                     <TextBlock Text="{Binding FinalScore, StringFormat='{}{0:F0}'}"
+                                           FontWeight="Bold"
+                                           FontSize="14" 
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="/100" 
+                                           Style="{StaticResource ValueStyle}"
+                                           VerticalAlignment="Bottom"/>
+                                
+                            </StackPanel>
 
-                            <TextBlock Text="Economy Score:" Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,8"/>
-                            <TextBlock Text="{Binding EconomyScore, StringFormat={}{0:F0}}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"/>
+                            <TextBlock Text="Economy Score:" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Text="{Binding EconomyScore, StringFormat='{}{0:F2}/0.30'}" Grid.Row="2" Grid.Column="1" Style="{StaticResource ScoreValueStyle}"/>
 
-                            <TextBlock Text="Government Score:" Grid.Row="3" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding GovernmentScore, StringFormat={}{0:F0}}" Grid.Row="3" Grid.Column="1"/>
+                            <TextBlock Text="Government Score:" Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Text="{Binding GovernmentScore, StringFormat='{}{0:F2}/0.20'}" Grid.Row="3" Grid.Column="1" Style="{StaticResource ScoreValueStyle}"/>
                         </Grid>
                     </StackPanel>
-                </ui:CardControl>
+                </Border>
 
-                <ui:CardControl Margin="0,0,0,16">
+                <Border Background="{StaticResource FallbackCardBackground}" 
+                    CornerRadius="4" 
+                    Padding="16"
+                    Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="Additional Information" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:SymbolIcon Symbol="DataHistogram24" 
+                          Foreground="{StaticResource FallbackForeground}"
+                          Margin="0,0,8,0"/>
+                            <TextBlock Text="Additional Information" Style="{StaticResource SectionHeaderStyle}"/>
+                        </StackPanel>
 
                         <Grid>
                             <Grid.RowDefinitions>
@@ -78,29 +168,114 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="No Rings Score:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,8"/>
-                            <TextBlock Text="{Binding NoRingsScore, StringFormat='Score: {0:F2}/100'}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"/>
-                            <TextBlock Text="Security Score:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,8"/>
-                            <TextBlock Text="{Binding SecurityScore, StringFormat='Score: {0:F2}/100'}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"/>
+                            <TextBlock Text="No Rings Score:" Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <ProgressBar Grid.Row="0" Grid.Column="1" 
+                         Value="{Binding NoRingsScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='NoRings', Mode=OneWay}" 
+                         Maximum="100"
+                         Height="8"
+                         Margin="0,0,8,8"
+                         VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding NoRingsScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='NoRings', StringFormat='{}{0:F0}%'}" 
+                       Grid.Row="0" Grid.Column="2" 
+                       Style="{StaticResource ValueStyle}"
+                       HorizontalAlignment="Right"/>
 
-                            <TextBlock Text="Faction State Score:" Grid.Row="2" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,8"/>
-                            <TextBlock Text="{Binding FactionStateScore, StringFormat='Score: {0:F2}/100'}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"/>
+                            <TextBlock Text="Security Score:" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <ProgressBar Grid.Row="1" Grid.Column="1" 
+                         Value="{Binding SecurityScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='Security', Mode=OneWay}" 
+                         Maximum="100"
+                         Height="8"
+                         Margin="0,0,8,8"
+                         VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SecurityScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='Security', StringFormat='{}{0:F0}%'}" 
+                       Grid.Row="1" Grid.Column="2" 
+                       Style="{StaticResource ValueStyle}"
+                       HorizontalAlignment="Right"/>
 
-                            <TextBlock Text="Market Demand Score:" Grid.Row="3" Grid.Column="0" FontWeight="SemiBold" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding MarketDemandScore,StringFormat='Score: {0:F2}/100'}" Grid.Row="3" Grid.Column="1"/>
+                            <TextBlock Text="Faction State Score:" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <ProgressBar Grid.Row="2" Grid.Column="1" 
+                         Value="{Binding FactionStateScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='FactionState', Mode=OneWay}" 
+                         Maximum="100"
+                         Height="8"
+                         Margin="0,0,8,8"
+                         VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding FactionStateScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='FactionState', StringFormat='{}{0:F0}%'}" 
+                       Grid.Row="2" Grid.Column="2" 
+                       Style="{StaticResource ValueStyle}"
+                       HorizontalAlignment="Right"/>
+
+                            <TextBlock Text="Market Demand Score:" Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <ProgressBar Grid.Row="3" Grid.Column="1" 
+                         Value="{Binding MarketDemandScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='MarketDemand', Mode=OneWay}" 
+                         Maximum="100"
+                         Height="8"
+                         Margin="0,0,8,0"
+                         VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MarketDemandScore, Converter={StaticResource WeightedScoreToPercentageConverter}, ConverterParameter='MarketDemand', StringFormat='{}{0:F0}%'}" 
+                       Grid.Row="3" Grid.Column="2" 
+                       Style="{StaticResource ValueStyle}"
+                       HorizontalAlignment="Right"/>
                         </Grid>
                     </StackPanel>
-                </ui:CardControl>
+                </Border>
 
-                <ui:CardControl>
+                <!-- Piracy Potential Rating -->
+                <Border Background="{StaticResource FallbackCardBackground}" 
+                        CornerRadius="4" 
+                        Padding="16"
+                        Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="Recommendation" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                        <TextBlock Text="{Binding Recommendation}" TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:SymbolIcon Symbol="Star24" 
+                                          Foreground="{StaticResource FallbackForeground}"
+                                          Margin="0,0,8,0"/>
+                            <TextBlock Text="Piracy Potential" Style="{StaticResource SectionHeaderStyle}"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:SymbolIcon Symbol="Star24" 
+                                          Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                          Margin="0,0,2,0"
+                                          Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=1}"/>
+                            <ui:SymbolIcon Symbol="Star24" 
+                                          Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                          Margin="0,0,2,0"
+                                          Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=2}"/>
+                            <ui:SymbolIcon Symbol="Star24" 
+                                          Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                          Margin="0,0,2,0"
+                                          Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=3}"/>
+                            <ui:SymbolIcon Symbol="Star24" 
+                                          Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                          Margin="0,0,2,0"
+                                          Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=4}"/>
+                            <ui:SymbolIcon Symbol="Star24" 
+                                          Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                          Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=5}"/>
+                        </StackPanel>
                     </StackPanel>
-                </ui:CardControl>
+                </Border>
+
+                <!-- Recommendation Card -->
+                <Border Background="{StaticResource FallbackCardBackground}" 
+                        CornerRadius="4" 
+                        Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:SymbolIcon Symbol="{Binding RecommendationIcon}"
+                                          Foreground="{Binding RecommendationIconColor}"
+                                          Margin="0,0,8,0"/>
+                            <TextBlock Text="Recommendation" Style="{StaticResource SectionHeaderStyle}"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Recommendation}" Style="{StaticResource RecommendationStyle}"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>
+    

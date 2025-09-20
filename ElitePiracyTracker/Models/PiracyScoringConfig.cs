@@ -29,6 +29,14 @@
         public bool SkippedMarket { get; set; }
         public double FinalScore { get; set; }
 
+        // Add these properties to track individual factors
+        public bool HasIndustrialEconomy { get; set; }
+        public bool HasExtractionEconomy { get; set; }
+        public bool HasNoRings { get; set; }
+        public bool HasAnarchyGovernment { get; set; }
+        public bool HasLowSecurity { get; set; }
+        public bool HasPirateFaction { get; set; }
+        public CommodityMarket? BestCommodity { get; set; }
 
 
         public override string ToString()
@@ -41,5 +49,7 @@
                    $"  Faction State: {FactionStateScore:F2}\n" +
                    $"  Market Demand: {(MarketDemandScore == 0 ? "Skipped" : MarketDemandScore.ToString("F2"))}";
         }
+
+        
     }
 }
