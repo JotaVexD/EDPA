@@ -10,13 +10,17 @@
 
 *A analytics tool for PvE piracy targeting miners in Elite Dangerous*
 
+*This is a tool for my personal use*
+
 </div>
 
 ## Project Status
 
-⚠️ **Development Preview** 
-- This is currently in active development and not yet a production/use-ready. 
-- Features and code are being added and refined. (Code still trash and very desorganized)
+> [!CAUTION]
+> **Development Preview** 
+> - This is currently in active development and not yet a production/use-ready. 
+> - Features and code are being added and refined. (Code still trash and very desorganized)
+
 
 ## Objective
 
@@ -47,3 +51,11 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 ### First-Time Setup
 - TODO
 
+<details>
+  <summary>Exemple Images</summary>
+  
+  ![Exemple Search](https://github.com/user-attachments/assets/54ef5079-075a-466d-8387-68947133e760)
+  ![Exemple System Details](https://github.com/user-attachments/assets/23b7e4a3-efdd-4b9f-9125-5bda55169394)
+  ![Exemple Saved Systems](https://github.com/user-attachments/assets/b4adeb99-19a8-4fa3-9774-eb9783c7b668)
+  
+</details>
