@@ -12,12 +12,17 @@ namespace ElitePiracyTracker.Services
     public class SpanshSystemSearch
     {
         private readonly HttpClient _httpClient;
+        private readonly CacheService _cacheService;
 
-        public SpanshSystemSearch()
+        public SpanshSystemSearch(CacheService cacheService)
         {
             _httpClient = new HttpClient();
+            _cacheService = cacheService ?? new CacheService(TimeSpan.FromHours(24));
             SetupDefaultHeaders();
         }
+
+        // Keep your existing constructor for backward compatibility
+        public SpanshSystemSearch() : this(new CacheService(TimeSpan.FromHours(24))) { }
 
         private void SetupDefaultHeaders()
         {
@@ -40,58 +45,67 @@ namespace ElitePiracyTracker.Services
 
         public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy, int maxResults = 30)
         {
-            try
-            {
-                // Step 1: Create the search request
-                var searchReference = await CreateSearch(referenceSystem, maxDistanceLy, maxResults);
+            // Create a unique cache key for this search
+            var cacheKey = $"Search_{referenceSystem}_{maxDistanceLy}_{maxResults}";
 
-                if (string.IsNullOrEmpty(searchReference))
+            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
+            {
+                try
                 {
-                    throw new Exception("Failed to create search - no search reference returned");
+                    // Step 1: Create the search request
+                    var searchReference = await CreateSearch(referenceSystem, maxDistanceLy, maxResults);
+
+                    if (string.IsNullOrEmpty(searchReference))
+                    {
+                        throw new Exception("Failed to create search - no search reference returned");
+                    }
+
+                    // Add a small delay to ensure the search is ready
+                    await Task.Delay(500);
+
+                    // Step 2: Retrieve the search results with full system data
+                    var systems = await GetSearchResultsWithFullData(searchReference);
+                    return systems;
                 }
-
-                // Add a small delay to ensure the search is ready
-                await Task.Delay(500);
-
-                // Step 2: Retrieve the search results with full system data
-                var systems = await GetSearchResultsWithFullData(searchReference);
-                return systems;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in Spansh system search: {ex.Message}");
-                // Fall back to individual system lookup
-                return await GetSystemDataFallback(referenceSystem);
-            }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error in Spansh system search: {ex.Message}");
+                    // Fall back to individual system lookup
+                    return await GetSystemDataFallback(referenceSystem);
+                }
+            });
         }
 
         private async Task<List<SystemData>> GetSystemDataFallback(string systemName)
         {
-            // Fallback method to get individual system data
-            // This might be faster for single systems
-            try
+            var cacheKey = $"System_{systemName}";
+
+            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
             {
-                var url = $"https://spansh.co.uk/api/systems/{Uri.EscapeDataString(systemName)}";
-
-                using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                var response = await _httpClient.SendAsync(request);
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    using JsonDocument doc = JsonDocument.Parse(responseBody);
-                    var systemElement = doc.RootElement;
+                    var url = $"https://spansh.co.uk/api/systems/{Uri.EscapeDataString(systemName)}";
 
-                    var systemData = ParseSystemData(systemElement);
-                    return new List<SystemData> { systemData };
+                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                    var response = await _httpClient.SendAsync(request);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(responseBody);
+                        var systemElement = doc.RootElement;
+
+                        var systemData = ParseSystemData(systemElement);
+                        return new List<SystemData> { systemData };
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Fallback API call failed: {ex.Message}");
-            }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Fallback API call failed: {ex.Message}");
+                }
 
-            return new List<SystemData>();
+                return new List<SystemData>();
+            });
         }
 
         private async Task<string> CreateSearch(string referenceSystem, int maxDistanceLy, int maxResults)

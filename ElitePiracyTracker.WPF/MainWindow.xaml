@@ -35,6 +35,12 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <ui:TitleBar
+            Title="EDPA - Elite Dangerous Piracy Analytics"
+            Grid.Row="0"
+            Icon="pack://application:,,,/Assets/applicationIcon-256.png" Margin="-10,5,10,0" Height="38" />
+
+
         <ui:NavigationView x:Name="MainFrame" Grid.Row="1" PaneDisplayMode="LeftFluent">
             <ui:NavigationView.Header>
                 <ui:BreadcrumbBar
@@ -44,6 +50,7 @@
             </ui:NavigationView.Header>
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem
+                    x:Name="DashboardPage"
                     Content="Dashboard"
                     NavigationCacheMode="Enabled"
                     TargetPageType="{x:Type pages:DashboardPage}">
@@ -52,17 +59,19 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem
+                    x:Name="SavedSystems"
                     Content="Data"
                     NavigationCacheMode="Enabled"
-                    TargetPageType="{x:Type pages:DataPage}">
+                    TargetPageType="{x:Type pages:SavedSystems}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="DataHistogram24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem
+                    x:Name="SearchSystem"
                     Content="Data"
                     NavigationCacheMode="Enabled"
-                    TargetPageType="{x:Type pages:SearchSystem}">   
+                    TargetPageType="{x:Type pages:SearchSystem}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Search12" />
                     </ui:NavigationViewItem.Icon>
@@ -80,9 +89,13 @@
             </ui:NavigationView.FooterMenuItems>
         </ui:NavigationView>
 
-        <ui:TitleBar
-            Title="WPF UI - Simple Demo"
-            Grid.Row="0"
-            Icon="pack://application:,,,/Assets/applicationIcon-256.png" Margin="-10,5,10,0" Height="38" />
+        <!-- Overlay layer for SnackbarPresenter - This sits on top of everything -->
+        <Grid Grid.RowSpan="2" Panel.ZIndex="1000">
+            <ui:SnackbarPresenter 
+                x:Name="RootSnackbarPresenter"
+                HorizontalAlignment="Stretch"
+                Margin="0,0,0,0"
+                MaxWidth="900"/>
+        </Grid>
     </Grid>
 </ui:FluentWindow>

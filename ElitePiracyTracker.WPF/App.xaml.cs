@@ -1,4 +1,5 @@
-﻿using ElitePiracyTracker.WPF.Views.Pages;
+﻿using ElitePiracyTracker.WPF.Services;
+using ElitePiracyTracker.WPF.Views.Pages;
 using System.Windows;
 
 namespace ElitePiracyTracker.WPF

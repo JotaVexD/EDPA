@@ -11,10 +11,12 @@ namespace ElitePiracyTracker.WPF.Effects
         {
             if (value is double score)
             {
-                if (score >= 85) return new SolidColorBrush(Color.FromRgb(76, 175, 80)); // Green
-                if (score >= 65) return new SolidColorBrush(Color.FromRgb(255, 193, 7));  // Amber
-                if (score >= 45) return new SolidColorBrush(Color.FromRgb(255, 152, 0));  // Orange
-                return new SolidColorBrush(Color.FromRgb(244, 67, 54));                   // Red
+                if (score >= 85) return new SolidColorBrush(Color.FromRgb(76, 175, 80)); 
+                if (score >= 75) return new SolidColorBrush(Color.FromRgb(175, 172, 76)); 
+                if (score >= 60) return new SolidColorBrush(Color.FromRgb(255, 152, 0)); 
+                if (score >= 45) return new SolidColorBrush(Color.FromRgb(255, 125, 90)); 
+
+                return new SolidColorBrush(Color.FromRgb(244, 67, 54));                  
             }
             return new SolidColorBrush(Colors.Gray);
         }

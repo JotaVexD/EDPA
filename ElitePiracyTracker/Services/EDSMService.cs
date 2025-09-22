@@ -27,13 +27,25 @@ namespace ElitePiracyTracker.Services
         private readonly PiracyScoringConfig _config;
         private int _remainingRequests = 30; // Conservative estimate
         private DateTime _lastRateLimitUpdate = DateTime.UtcNow;
+        private readonly CacheService _cacheService;
 
-        public EDSMService(HttpClient httpClient, IConfiguration configuration, IMemoryCache memoryCache)
+        public EDSMService(HttpClient httpClient, IConfiguration configuration, IMemoryCache memoryCache, CacheService cacheService, IApiKeyProvider apiKeyProvider = null)
         {
             _httpClient = httpClient;
-            var edsConfig = configuration.GetSection("ApiSettings:EDSM");
-            _apiKey = edsConfig["ApiKey"];
-            _baseUrl = edsConfig["BaseUrl"] ?? "https://www.edsm.net/";
+
+            _cacheService = cacheService;
+            _baseUrl = configuration["ApiSettings:EDSM:BaseUrl"];
+
+            if (apiKeyProvider != null && apiKeyProvider.IsApiConfigured)
+            {
+                _apiKey = apiKeyProvider.GetEdsmApiKey();
+            }
+            //_apiKey = ApplicationStateService.Instance.GetEdsmApiKey();
+
+            if (string.IsNullOrEmpty(_apiKey))
+            {
+                throw new InvalidOperationException("EDSM API key is not configured. Please set it in settings.");
+            }
             _cache = memoryCache;
 
             // Load scoring configuration

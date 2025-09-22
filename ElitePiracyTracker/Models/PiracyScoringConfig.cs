@@ -8,6 +8,7 @@
         public double FactionStateScoreWeight { get; set; }
         public double MarketDemandScoreWeight { get; set; }
         public double SecurityScoreWeight { get; set; }
+        public double PopulationScoreWeight { get; set; }
 
         public Dictionary<string, double> EconomyMultipliers { get; set; }
         public Dictionary<string, double> GovernmentMultipliers { get; set; }
@@ -15,6 +16,7 @@
         public Dictionary<string, double> FactionStateMultipliers { get; set; }
         public Dictionary<string, double> DemandThresholds { get; set; }
         public Dictionary<string, double> ValuableCommodities { get; set; }
+        public Dictionary<string, double> PopulationMultipliers { get; set; }
     }
 
     public class PiracyScoreResult
@@ -26,8 +28,10 @@
         public double SecurityScore { get; set; }
         public double FactionStateScore { get; set; }
         public double MarketDemandScore { get; set; }
+        public double PopulationScore { get; set; }
         public bool SkippedMarket { get; set; }
         public double FinalScore { get; set; }
+        public DateTime SaveTimestamp { get; set; } = DateTime.Now;
 
         // Add these properties to track individual factors
         public bool HasIndustrialEconomy { get; set; }

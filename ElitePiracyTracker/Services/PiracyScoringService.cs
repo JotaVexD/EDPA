@@ -12,8 +12,6 @@ namespace ElitePiracyTracker.Services
     public class PiracyScoringService
     {
         private readonly PiracyScoringConfig _config;
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
         private readonly EDSMService _edsmService;
         private readonly SpanshSystemSearch _spanshSearcher;
         private readonly Dictionary<string, SystemData> _systemCache = new Dictionary<string, SystemData>();
@@ -34,6 +32,7 @@ namespace ElitePiracyTracker.Services
             _config.GovernmentMultipliers = scoringParams.GetSection("GovernmentMultipliers").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
             _config.SecurityMultipliers = scoringParams.GetSection("SecurityMultipliers").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
             _config.FactionStateMultipliers = scoringParams.GetSection("FactionStateMultipliers").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
+            _config.PopulationMultipliers = scoringParams.GetSection("PopulationMultipliers").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
             _config.DemandThresholds = scoringParams.GetSection("DemandThresholds").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
             _config.ValuableCommodities = scoringParams.GetSection("ValuableCommodities").Get<Dictionary<string, double>>() ?? new Dictionary<string, double>();
         }
@@ -72,7 +71,7 @@ namespace ElitePiracyTracker.Services
                 }
             }
 
-            if (systemData == null)
+            if (systemData == null || systemData.Name == "Test")
             {
                 return null;
             }
@@ -85,6 +84,7 @@ namespace ElitePiracyTracker.Services
             result.GovernmentScore = CalculateGovernmentScore(systemData.Government) * _config.GovernmentScoreWeight;
             result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
             result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
+            result.PopulationScore = CalculatePopulationScore(systemData.Population, _config.PopulationMultipliers) * _config.PopulationScoreWeight;
 
             result.HasIndustrialEconomy = systemData.Economy == "Industrial";
             result.HasExtractionEconomy = systemData.Economy == "Extraction";
@@ -96,13 +96,13 @@ namespace ElitePiracyTracker.Services
             // Calculate score without market demand
             double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
                                        result.GovernmentScore + result.SecurityScore +
-                                       result.FactionStateScore;
+                                       result.FactionStateScore + result.PopulationScore;
 
             // Scale to 0-100 for comparison
             double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
 
             // Only calculate market demand if the score is already 70+
-            if (scoreWithoutMarketScaled >= 60)
+            if (scoreWithoutMarketScaled >= 70)
             {
                 result.SkippedMarket = false;
                 result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
@@ -144,6 +144,7 @@ namespace ElitePiracyTracker.Services
             result.GovernmentScore = CalculateGovernmentScore(systemData.Government) * _config.GovernmentScoreWeight;
             result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
             result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
+            result.PopulationScore = CalculatePopulationScore(systemData.Population, _config.PopulationMultipliers) * _config.PopulationScoreWeight;
 
             result.HasIndustrialEconomy = systemData.Economy == "Industrial";
             result.HasExtractionEconomy = systemData.Economy == "Extraction";
@@ -155,7 +156,7 @@ namespace ElitePiracyTracker.Services
             // Calculate score without market demand
             double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
                                        result.GovernmentScore + result.SecurityScore +
-                                       result.FactionStateScore;
+                                       result.FactionStateScore + result.PopulationScore;
 
             // Scale to 0-100 for comparison
             double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
@@ -274,7 +275,27 @@ namespace ElitePiracyTracker.Services
             return bestCommodity;
         }
 
+        public double CalculatePopulationScore(long population, Dictionary<string, double> multipliers)
+        {
+            if (population < 0)
+                return 0.0; // Or throw an exception
 
+            // Check ranges in order of most specific to least specific
+            if (population >= 100000000 && population < 1000000000)
+                return multipliers["100M-1B"];
+
+            if (population >= 1000000 && population < 100000000)
+                return multipliers["1M-100M"];
+
+            if (population >= 1000000000 && population < 10000000000)
+                return multipliers["1B-10B"];
+
+            if (population >= 10000000000)
+                return multipliers["10B+"];
+            else
+                // Default case: population < 1,000,000
+                return multipliers["<1M"];
+        }
         private async Task<double> CalculateMarketDemandScore(SystemData systemData)
         {
             if (systemData.Stations.Count == 0) return 0;

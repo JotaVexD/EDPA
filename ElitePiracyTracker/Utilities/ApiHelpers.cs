@@ -10,18 +10,6 @@ namespace ElitePiracyTracker.Utilities
 {
     public static class ApiHelpers
     {
-        public static async Task<T> ReadAsJsonAsync<T>(this HttpContent content)
-        {
-            var json = await content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(json);
-        }
-
-        public static HttpContent ToJsonContent(this object data)
-        {
-            var json = JsonConvert.SerializeObject(data);
-            return new StringContent(json, Encoding.UTF8, "application/json");
-        }
-
         public static async Task<string> DebugApiCall(HttpClient client, string url, HttpMethod method, HttpContent content)
         {
             try
@@ -49,6 +37,28 @@ namespace ElitePiracyTracker.Utilities
                 Console.WriteLine($"API Debug Error: {ex.Message}");
                 return null;
             }
+        }
+
+        public class ApiException : Exception
+        {
+            public string ResponseContent { get; }
+
+            public ApiException(string message) : base(message) { }
+
+            public ApiException(string message, string responseContent) : base(message)
+            {
+                ResponseContent = responseContent;
+            }
+
+            public ApiException(string message, Exception innerException) : base(message, innerException) { }
+        }
+
+        // Interface for error handling (can be implemented to show flyouts, log errors, etc.)
+        public interface IErrorHandler
+        {
+            void HandleApiError(ApiException ex);
+            void HandleHttpError(HttpRequestException ex);
+            void HandleUnexpectedError(Exception ex, string context = null);
         }
     }
 }

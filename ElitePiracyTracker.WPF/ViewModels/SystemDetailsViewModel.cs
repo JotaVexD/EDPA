@@ -1,37 +1,58 @@
 ﻿using ElitePiracyTracker.Models;
 using System.Windows.Media;
+using Wpf.Ui;
 
 namespace ElitePiracyTracker.WPF.ViewModels
 {
     public class SystemDetailsViewModel
     {
-        private readonly PiracyScoreResult _system;
+        private readonly PiracyScoreResult _scoreResult;
+        private readonly SystemData _systemData;
 
-        public SystemDetailsViewModel(PiracyScoreResult system)
+        public SystemDetailsViewModel(PiracyScoreResult scoreResult, SystemData systemData)
         {
-            _system = system;
+            _scoreResult = scoreResult;
+            _systemData = systemData;
         }
 
-        public string SystemName => _system.SystemName;
-        public double FinalScore => _system.FinalScore;
-        public double EconomyScore => _system.EconomyScore;
-        public double NoRingsScore => _system.NoRingsScore;
-        public double GovernmentScore => _system.GovernmentScore;
-        public double SecurityScore => _system.SecurityScore;
-        public double FactionStateScore => _system.FactionStateScore;
-        public double MarketDemandScore => _system.MarketDemandScore;
+        public string SystemName => _scoreResult.SystemName;
+        public double FinalScore => _scoreResult.FinalScore;
+        public double EconomyScore => _scoreResult.EconomyScore;
+        public double NoRingsScore => _scoreResult.NoRingsScore;
+        public double GovernmentScore => _scoreResult.GovernmentScore;
+        public double SecurityScore => _scoreResult.SecurityScore;
+        public double PopulationScore => _scoreResult.PopulationScore;
+        public double FactionStateScore => _scoreResult.FactionStateScore;
+        public double MarketDemandScore => _scoreResult.MarketDemandScore;
+        public string EconomyDescription => $"{_systemData.Economy} / {_systemData.SecondEconomy}";
+        public string GovernmentDescription => _systemData.Government; 
+        public string PopulationDescription => $"{_systemData.Population:n0}";
+        public string NoRingsDescription => "No rings present";
+        public string SecurityDescription => _systemData.Government;
+        public string FactionStateDescription => _systemData.FactionState;
+        public string MarketDemandDescription
+        {
+            get
+            {
+                if (_scoreResult.BestCommodity.Name == null)
+                    return "No demand on the system";
+                else
+                    return "Demand of " + _scoreResult.BestCommodity.Name + " with a quantity of " + _scoreResult.BestCommodity.Demand;
+            }
+        }
+        
         public string Recommendation
         {
             get
             {
-                if (FinalScore >= 80)
+                if (FinalScore >= 85)
                     return "EXCELLENT PIRACY SPOT - Highly recommended due to optimal combination of factors including " +
                            GetPositiveFactors() + ". " + GetImprovementAreas();
-                else if (FinalScore >= 60)
+                else if (FinalScore >= 75)
                     return "Good piracy spot - Recommended with " + GetPositiveFactors() + ". " + GetImprovementAreas();
-                else if (FinalScore >= 40)
+                else if (FinalScore >= 60)
                     return "Average piracy spot - Consider other options. " + GetPositiveFactors() + ". " + GetImprovementAreas();
-                else if (FinalScore >= 20)
+                else if (FinalScore >= 45)
                     return "Poor piracy spot - Not recommended due to " + GetNegativeFactors() + ". " + GetImprovementAreas();
                 else
                     return "Very poor piracy spot - Avoid at all costs due to " + GetNegativeFactors() + ". " + GetImprovementAreas();
@@ -42,12 +63,12 @@ namespace ElitePiracyTracker.WPF.ViewModels
         {
             var factors = new List<string>();
 
-            if (_system.HasIndustrialEconomy || _system.HasExtractionEconomy) factors.Add("favorable economy");
-            if (_system.HasNoRings) factors.Add("lack of rings");
-            if (_system.HasAnarchyGovernment) factors.Add("anarchic government");
-            if (_system.HasLowSecurity) factors.Add("low security presence");
-            if (_system.HasPirateFaction) factors.Add("pirate faction presence");
-            if (_system.MarketDemandScore > 0.05 && _system.BestCommodity != null) factors.Add($"high market demand of {_system.BestCommodity.Name}");
+            if (_scoreResult.HasIndustrialEconomy || _scoreResult.HasExtractionEconomy) factors.Add("\n\t- Favorable economy");
+            if (_scoreResult.HasNoRings) factors.Add("\n\t- Lack of rings");
+            if (_scoreResult.HasAnarchyGovernment) factors.Add("\n\t- Anarchic government");
+            if (_scoreResult.HasLowSecurity) factors.Add("\n\t- Low security presence");
+            if (_scoreResult.HasPirateFaction) factors.Add("\n\t- Pirate faction presence");
+            if (_scoreResult.MarketDemandScore > 0.05 && _scoreResult.BestCommodity != null) factors.Add($"\n\t- High market demand of {_scoreResult.BestCommodity.Name}");
 
             return factors.Count > 0 ? string.Join(", ", factors) : "minimal positive factors";
         }
@@ -56,13 +77,13 @@ namespace ElitePiracyTracker.WPF.ViewModels
         {
             var factors = new List<string>();
 
-            if (!_system.HasIndustrialEconomy && !_system.HasExtractionEconomy) factors.Add("unfavorable economy");
-            if (!_system.HasNoRings) factors.Add("presence of rings");
-            if (!_system.HasAnarchyGovernment) factors.Add("strong government presence");
-            if (!_system.HasLowSecurity) factors.Add("high security");
-            if (!_system.HasPirateFaction) factors.Add("lack of pirate factions");
-            if (_system.MarketDemandScore < 0.02) factors.Add("bad markets demand");
-            if ((_system.MarketDemandScore >= 0.02 && _system.MarketDemandScore <= 0.05) && _system.BestCommodity != null) factors.Add($"low market demand of {_system.BestCommodity.Name}");
+            if (!_scoreResult.HasIndustrialEconomy && !_scoreResult.HasExtractionEconomy) factors.Add("\n\t- Unfavorable economy");
+            if (!_scoreResult.HasNoRings) factors.Add("\n\t- Presence of rings");
+            if (!_scoreResult.HasAnarchyGovernment) factors.Add("\n\t- Strong government presence");
+            if (!_scoreResult.HasLowSecurity) factors.Add("\n\t- High security");
+            if (!_scoreResult.HasPirateFaction) factors.Add("\n\t- Lack of pirate factions");
+            if (_scoreResult.MarketDemandScore < 0.02) factors.Add("\n\t- Bad markets demand");
+            if ((_scoreResult.MarketDemandScore >= 0.02 && _scoreResult.MarketDemandScore <= 0.05) && _scoreResult.BestCommodity != null) factors.Add($"\n\t- Low market demand of {_scoreResult.BestCommodity.Name}");
 
             return factors.Count > 0 ? string.Join(", ", factors) : "overall poor conditions";
         }
@@ -71,13 +92,13 @@ namespace ElitePiracyTracker.WPF.ViewModels
         {
             var improvements = new List<string>();
 
-            if (!_system.HasIndustrialEconomy && !_system.HasExtractionEconomy) improvements.Add("look for industrial/extraction economies");
-            if (!_system.HasNoRings) improvements.Add("prioritize systems without rings");
-            if (!_system.HasAnarchyGovernment) improvements.Add("seek anarchic systems");
-            if (!_system.HasLowSecurity) improvements.Add("target low security systems");
-            if (!_system.HasPirateFaction) improvements.Add("find systems with pirate factions");
-            if (_system.MarketDemandScore < 0.02) improvements.Add("look for high demand markets");
-            if ((_system.MarketDemandScore >= 0.02 && _system.MarketDemandScore <= 0.05) && _system.BestCommodity != null) improvements.Add($"market demand of {_system.BestCommodity.Name}");
+            if (!_scoreResult.HasIndustrialEconomy && !_scoreResult.HasExtractionEconomy) improvements.Add("\n\t- Look for industrial/extraction economies");
+            if (!_scoreResult.HasNoRings) improvements.Add("\n\t- Prioritize systems without rings");
+            if (!_scoreResult.HasAnarchyGovernment) improvements.Add("\n\t- Seek anarchic systems");
+            if (!_scoreResult.HasLowSecurity) improvements.Add("\n\t- Target low security systems");
+            if (!_scoreResult.HasPirateFaction) improvements.Add("\n\t- Find systems with pirate factions");
+            if (_scoreResult.MarketDemandScore < 0.02) improvements.Add("\n\t- Look for high demand markets");
+            if ((_scoreResult.MarketDemandScore >= 0.02 && _scoreResult.MarketDemandScore <= 0.05) && _scoreResult.BestCommodity != null) improvements.Add($"\n\t- The market have a demand of {_scoreResult.BestCommodity.Name} that is nice but not the best");
 
 
             return improvements.Count > 0 ? "\nFor better results: " + string.Join(", ", improvements) + "." : "";
