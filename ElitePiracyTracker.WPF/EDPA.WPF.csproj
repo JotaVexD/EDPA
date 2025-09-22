@@ -38,7 +38,7 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ElitePiracyTracker\ElitePiracyTracker.csproj" />
+    <ProjectReference Include="..\ElitePiracyTracker\EDPA.csproj" />
   </ItemGroup>
 
   <ItemGroup>
