@@ -120,7 +120,7 @@
                     <Slider x:Name="MaxDistanceSlider" 
                         TickFrequency="1"
                         Minimum="1" 
-                        Maximum="30" 
+                        Maximum="50" 
                         Width="150"
                         Value="10"
                         IsSnapToTickEnabled="True"
