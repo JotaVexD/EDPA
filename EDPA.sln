@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDPA", "ElitePiracyTracker\EDPA.csproj", "{1C2BDDBE-378F-41C0-883A-56455F425BD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDPA", "EDPA\EDPA.csproj", "{1C2BDDBE-378F-41C0-883A-56455F425BD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDPA.WPF", "ElitePiracyTracker.WPF\EDPA.WPF.csproj", "{1E93869F-B2ED-4720-A159-94ACA4828A59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDPA.WPF", "EDPA.WPF\EDPA.WPF.csproj", "{1E93869F-B2ED-4720-A159-94ACA4828A59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
