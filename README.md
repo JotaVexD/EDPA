@@ -10,7 +10,7 @@
 
 *A analytics tool for PvE piracy targeting miners in Elite Dangerous*
 
-*This is a tool for my personal use*
+*This is a tool mainly for my personal use that I decided to make public*
 
 </div>
 
