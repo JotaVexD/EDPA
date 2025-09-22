@@ -2,11 +2,11 @@
 
 <div align="center">
 
-![EDPA Logo](https://img.shields.io/badge/Elite-Dangerous-orange) 
+[![EDPA Logo](https://img.shields.io/badge/Elite-Dangerous-orange)](https://www.elitedangerous.com/en-US)
 ![Version](https://img.shields.io/badge/Version-Development--Preview-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)
-![.NET](https://img.shields.io/badge/.NET-8.0-purple)
-![WPF](https://img.shields.io/badge/4.0.3-WPF-UI?color=%23088da5)
+[![.NET](https://img.shields.io/badge/.NET-8.0-purple)](https://dotnet.microsoft.com/en-us/)
+[![WPF](https://img.shields.io/badge/4.0.3-WPF-UI?color=%23088da5)](https://github.com/lepoco/wpfui)
 
 *A analytics tool for PvE piracy targeting miners in Elite Dangerous*
 
