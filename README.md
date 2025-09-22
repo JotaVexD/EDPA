@@ -34,7 +34,7 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 
 ### Current Features
 - **System Analysis** - Scoring of systems for piracy viability
-- **Customizable Search Radius** - Search within 10-200 LY of any reference system
+- **Customizable Search Radius** - Search within 1-50 LY of any reference system
 - **Weighted Scoring System** - Configurable weights for different economic and political factors
 
 ## Using
