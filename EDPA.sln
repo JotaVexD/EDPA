@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDPA.WPF", "EDPA.WPF\EDPA.W
 		{1C2BDDBE-378F-41C0-883A-56455F425BD6} = {1C2BDDBE-378F-41C0-883A-56455F425BD6}
 	EndProjectSection
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "EDPASetup", "EDPASetup\EDPASetup.vdproj", "{A282DA94-AD18-8072-1E04-1382426931D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,8 @@ Global
 		{1E93869F-B2ED-4720-A159-94ACA4828A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E93869F-B2ED-4720-A159-94ACA4828A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E93869F-B2ED-4720-A159-94ACA4828A59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A282DA94-AD18-8072-1E04-1382426931D8}.Debug|Any CPU.ActiveCfg = Debug
+		{A282DA94-AD18-8072-1E04-1382426931D8}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

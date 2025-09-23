@@ -11,6 +11,8 @@ using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
+using System;
+using System.Threading.Tasks;
 
 namespace EDPA.WPF;
 

@@ -1,13 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-	<ApplicationIcon>applicationIcon.ico</ApplicationIcon>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<AssemblyName>EDPA</AssemblyName>
+		<ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
+		<AssemblyVersion>0.1.0</AssemblyVersion>
+		<FileVersion>0.1.0</FileVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Resource Include="Assets\favicon.ico" />
+	</ItemGroup>
+
 
    <ItemGroup>
      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
@@ -22,20 +32,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-	
-	<ItemGroup>
-		<Content Include="applicationIcon.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Remove="Assets\applicationIcon-1024.png" />
-		<None Remove="Assets\applicationIcon-256.png" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Resource Include="Assets\applicationIcon-1024.png" />
-		<Resource Include="Assets\applicationIcon-256.png" />
-	</ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EDPA\EDPA.csproj" />
@@ -43,6 +39,21 @@
 
   <ItemGroup>
     <Folder Include="Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
