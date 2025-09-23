@@ -1,6 +1,7 @@
 ﻿using EDPA.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 using System.Text;
@@ -13,12 +14,18 @@ namespace EDPA.Services
     {
         private readonly HttpClient _httpClient;
         private readonly CacheService _cacheService;
+        private const int MaxPageSize = 500;
 
         public SpanshSystemSearch(CacheService cacheService)
         {
             _httpClient = new HttpClient();
             _cacheService = cacheService ?? new CacheService(TimeSpan.FromHours(24));
             SetupDefaultHeaders();
+        }
+
+        public CacheService GetCacheService()
+        {
+            return _cacheService;
         }
 
         // Keep your existing constructor for backward compatibility
@@ -43,17 +50,17 @@ namespace EDPA.Services
             _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
         }
 
-        public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy, int maxResults = 30)
+        public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy)
         {
             // Create a unique cache key for this search
-            var cacheKey = $"Search_{referenceSystem}_{maxDistanceLy}_{maxResults}";
+            var cacheKey = $"Search_{referenceSystem}_{maxDistanceLy}";
 
             return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
             {
                 try
                 {
                     // Step 1: Create the search request
-                    var searchReference = await CreateSearch(referenceSystem, maxDistanceLy, maxResults);
+                    var searchReference = await CreateSearch(referenceSystem, maxDistanceLy);
 
                     if (string.IsNullOrEmpty(searchReference))
                     {
@@ -63,8 +70,8 @@ namespace EDPA.Services
                     // Add a small delay to ensure the search is ready
                     await Task.Delay(500);
 
-                    // Step 2: Retrieve the search results with full system data
-                    var systems = await GetSearchResultsWithFullData(searchReference);
+                    // Step 2: Retrieve ALL search results with pagination
+                    var systems = await GetAllSearchResults(searchReference);
                     return systems;
                 }
                 catch (Exception ex)
@@ -108,8 +115,21 @@ namespace EDPA.Services
             });
         }
 
-        private async Task<string> CreateSearch(string referenceSystem, int maxDistanceLy, int maxResults)
+        public async Task UpdateSearchCache(string cacheKey, List<SystemData> systemsData)
         {
+            try
+            {
+                await _cacheService.GetOrCreateAsync(cacheKey, async () => systemsData, TimeSpan.FromHours(24));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating search cache: {ex.Message}");
+            }
+        }
+
+        private async Task<string> CreateSearch(string referenceSystem, int maxDistanceLy)
+        {
+            // Use MaxPageSize to get the maximum systems per page
             var payload = new
             {
                 filters = new
@@ -121,7 +141,7 @@ namespace EDPA.Services
                     }
                 },
                 sort = Array.Empty<object>(),
-                size = maxResults,
+                size = MaxPageSize, // Get maximum systems per page
                 page = 0,
                 reference_system = referenceSystem
             };
@@ -148,32 +168,70 @@ namespace EDPA.Services
             throw new Exception("Search reference not found in response");
         }
 
-        private async Task<List<SystemData>> GetSearchResultsWithFullData(string searchReference)
+        private async Task<List<SystemData>> GetAllSearchResults(string searchReference)
         {
-            var url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            string responseBody = await response.Content.ReadAsStringAsync();
-
             var systems = new List<SystemData>();
-            using JsonDocument doc = JsonDocument.Parse(responseBody);
-            var root = doc.RootElement;
+            int from = 0;
+            bool hasMoreResults = true;
 
-            if (root.TryGetProperty("results", out var resultsElement) && resultsElement.ValueKind == JsonValueKind.Array)
+            while (hasMoreResults)
             {
-                foreach (var system in resultsElement.EnumerateArray())
+                try
                 {
-                    var systemData = ParseSystemData(system);
-                    if (systemData != null)
+                    var url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}?from={from}";
+
+                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                    var response = await _httpClient.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(responseBody);
+                    var root = doc.RootElement;
+
+                    // Check if we have results
+                    if (!root.TryGetProperty("results", out var resultsElement) ||
+                        resultsElement.ValueKind != JsonValueKind.Array ||
+                        !resultsElement.EnumerateArray().Any())
                     {
-                        systems.Add(systemData);
+                        break; // No more results
                     }
+
+                    // Parse systems from current page
+                    var pageSystems = new List<SystemData>();
+                    foreach (var system in resultsElement.EnumerateArray())
+                    {
+                        var systemData = ParseSystemData(system);
+                        if (systemData != null)
+                        {
+                            pageSystems.Add(systemData);
+                        }
+                    }
+
+                    // Add all systems from this page
+                    systems.AddRange(pageSystems);
+
+                    // Check if this was the last page (fewer results than max page size)
+                    if (pageSystems.Count < MaxPageSize)
+                    {
+                        hasMoreResults = false;
+                    }
+                    else
+                    {
+                        // Update 'from' for next page
+                        from += pageSystems.Count;
+
+                        // Add a small delay to be respectful to the API
+                        await Task.Delay(200);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error retrieving page starting from {from}: {ex.Message}");
+                    hasMoreResults = false;
                 }
             }
 
+            Console.WriteLine($"Retrieved {systems.Count} systems total");
             return systems;
         }
 
@@ -311,7 +369,7 @@ namespace EDPA.Services
             {
                 foreach (var faction in minorFactionPresenceElement.EnumerateArray())
                 {
-                    
+
                     var minorFaction = new MinorFactionPresences();
 
                     if (faction.TryGetProperty("name", out var minorFactionNameElement))
@@ -321,7 +379,7 @@ namespace EDPA.Services
 
                     if (faction.TryGetProperty("state", out var minorFactionStateElement))
                     {
-                        minorFaction.State = factionStateElement.GetString();
+                        minorFaction.State = minorFactionStateElement.GetString();
                     }
 
                     if (faction.TryGetProperty("influence", out var minorFactionInfluenceElement))
@@ -335,6 +393,5 @@ namespace EDPA.Services
 
             return systemData;
         }
-
     }
 }

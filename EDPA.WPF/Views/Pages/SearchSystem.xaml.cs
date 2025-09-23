@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -222,29 +224,28 @@ namespace EDPA.WPF.Views.Pages
                 return;
             }
 
-            // Set up progress
+            // Store the original cache key
+            string referenceSystem = ReferenceSystemTextBox.Text;
+            int maxDistance = (int)MaxDistanceSlider.Value;
+            var cacheKey = $"Search_{referenceSystem}_{maxDistance}";
+
             ProgressBar.Value = 0;
             ProgressBar.Maximum = systemsData.Count;
             ProgressBar.Visibility = Visibility.Visible;
 
-            // Create progress reporter
             var progress = new Progress<AnalysisProgress>(report =>
             {
                 ProgressBar.Value = report.Current;
-
                 if (report.Result != null)
                 {
                     ApplicationStateService.Instance.SearchResults.Add(report.Result);
                     _resultsView.Refresh();
                 }
-
-                // Optional: Update status with current system being processed
                 StatusLabel.Text = $"Analyzing... ({report.Current}/{report.Total}) - {report.SystemName}";
             });
 
             try
             {
-                // Use a semaphore to limit concurrent requests
                 var semaphore = new SemaphoreSlim(5, 5);
                 var tasks = new List<Task>();
 
@@ -260,10 +261,9 @@ namespace EDPA.WPF.Views.Pages
                         try
                         {
                             var result = await _scoringService.CalculateSystemScore(systemData: systemData);
+
                             if (result != null)
                             {
-                                result.FinalScore *= 100;
-
                                 Interlocked.Increment(ref completedCount);
                                 progressHandler.Report(new AnalysisProgress
                                 {
@@ -276,7 +276,6 @@ namespace EDPA.WPF.Views.Pages
                         }
                         catch (Exception ex)
                         {
-                            // Report error but don't block the UI
                             await Dispatcher.InvokeAsync(async () =>
                             {
                                 await ShowUiMessageAsync("Analysis Error", $"Error analyzing {systemData.Name}: {ex.Message}", "OK");
@@ -289,8 +288,9 @@ namespace EDPA.WPF.Views.Pages
                     }));
                 }
 
-                // Use ConfigureAwait(false) to avoid deadlocking the UI thread
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+
+                await UpdateSearchCacheWithEnrichedData(cacheKey, systemsData);
             }
             catch (Exception ex)
             {
@@ -300,7 +300,6 @@ namespace EDPA.WPF.Views.Pages
                 });
             }
 
-            // Final updates on UI thread
             await Dispatcher.InvokeAsync(() =>
             {
                 _systemsData = systemsData;
@@ -319,6 +318,51 @@ namespace EDPA.WPF.Views.Pages
                 ProgressBar.Visibility = Visibility.Collapsed;
                 UpdateUIState();
             });
+        }
+
+        private async Task UpdateSearchCacheWithEnrichedData(string cacheKey, List<SystemData> systemsData)
+        {
+            try
+            {
+                // Get the cache file path
+                var cacheService = _spanshSearcher.GetCacheService();
+                                                                      
+                var cacheDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "EDPA",
+                    "Cache"
+                );
+                var safeKey = string.Join("_", cacheKey.Split(Path.GetInvalidFileNameChars()));
+                var cacheFile = Path.Combine(cacheDirectory, $"{safeKey}.json");
+
+                if (File.Exists(cacheFile))
+                {
+                    // Read the existing cache entry
+                    var json = await File.ReadAllTextAsync(cacheFile);
+                    var cacheEntry = JsonSerializer.Deserialize<CacheEntry<List<SystemData>>>(json);
+
+                    if (cacheEntry != null)
+                    {
+                        // Update the data with our enriched systems
+                        cacheEntry.Data = systemsData;
+                        cacheEntry.CreatedAt = DateTime.UtcNow;
+
+                        // Save back to file
+                        var updatedJson = JsonSerializer.Serialize(cacheEntry, new JsonSerializerOptions
+                        {
+                            WriteIndented = true,
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                        });
+
+                        await File.WriteAllTextAsync(cacheFile, updatedJson);
+                        Console.WriteLine($"Updated cache file: {cacheFile}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating search cache: {ex.Message}");
+            }
         }
 
         private void ClosePopup_Click(object sender, RoutedEventArgs e)
@@ -444,7 +488,6 @@ namespace EDPA.WPF.Views.Pages
             public PiracyScoreResult Result { get; set; }
         }
 
-        // Public method to refresh the UI when navigating back to this page
         public void RefreshUI()
         {
             UpdateUIState();

@@ -35,7 +35,9 @@ namespace EDPA.WPF.ViewModels
         {
             get
             {
-                if (_scoreResult.BestCommodity.Name == null)
+                if(_scoreResult.SkippedMarket)
+                    return "Skipped Market because of low score.";
+                else if (_scoreResult.BestCommodity == null)
                     return "No demand on the system";
                 else
                     return "Demand of " + _scoreResult.BestCommodity.Name + " with a quantity of " + _scoreResult.BestCommodity.Demand;
@@ -68,7 +70,6 @@ namespace EDPA.WPF.ViewModels
             if (_scoreResult.HasNoRings) factors.Add("\n\t- Lack of rings");
             if (_scoreResult.HasAnarchyGovernment) factors.Add("\n\t- Anarchic government");
             if (_scoreResult.HasLowSecurity) factors.Add("\n\t- Low security presence");
-            if (_scoreResult.HasPirateFaction) factors.Add("\n\t- Pirate faction presence");
             if (_scoreResult.MarketDemandScore > 0.05 && _scoreResult.BestCommodity != null) factors.Add($"\n\t- High market demand of {_scoreResult.BestCommodity.Name}");
 
             return factors.Count > 0 ? string.Join(", ", factors) : "minimal positive factors";
@@ -82,7 +83,6 @@ namespace EDPA.WPF.ViewModels
             if (!_scoreResult.HasNoRings) factors.Add("\n\t- Presence of rings");
             if (!_scoreResult.HasAnarchyGovernment) factors.Add("\n\t- Strong government presence");
             if (!_scoreResult.HasLowSecurity) factors.Add("\n\t- High security");
-            if (!_scoreResult.HasPirateFaction) factors.Add("\n\t- Lack of pirate factions");
             if (_scoreResult.MarketDemandScore < 0.02) factors.Add("\n\t- Bad markets demand");
             if (_scoreResult.MarketDemandScore >= 0.02 && _scoreResult.MarketDemandScore <= 0.05 && _scoreResult.BestCommodity != null) factors.Add($"\n\t- Low market demand of {_scoreResult.BestCommodity.Name}");
 
@@ -97,7 +97,6 @@ namespace EDPA.WPF.ViewModels
             if (!_scoreResult.HasNoRings) improvements.Add("\n\t- Prioritize systems without rings");
             if (!_scoreResult.HasAnarchyGovernment) improvements.Add("\n\t- Seek anarchic systems");
             if (!_scoreResult.HasLowSecurity) improvements.Add("\n\t- Target low security systems");
-            if (!_scoreResult.HasPirateFaction) improvements.Add("\n\t- Find systems with pirate factions");
             if (_scoreResult.MarketDemandScore < 0.02) improvements.Add("\n\t- Look for high demand markets");
             if (_scoreResult.MarketDemandScore >= 0.02 && _scoreResult.MarketDemandScore <= 0.05 && _scoreResult.BestCommodity != null) improvements.Add($"\n\t- The market have a demand of {_scoreResult.BestCommodity.Name} that is nice but not the best");
 

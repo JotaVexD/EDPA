@@ -1,9 +1,4 @@
-﻿// This Source Code Form is subject to the terms of the MIT License.
-// If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
-// Copyright (C) Leszek Pomianowski and WPF UI Contributors.
-// All Rights Reserved.
-
-using EDPA.WPF.Services;
+﻿using EDPA.WPF.Services;
 using EDPA.Services;
 using EDPA.WPF.Views.Pages;
 using System.Windows;
@@ -16,9 +11,6 @@ using System.Threading.Tasks;
 
 namespace EDPA.WPF;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow
 {
     public ISnackbarService SnackbarService { get; private set; }

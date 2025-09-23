@@ -63,15 +63,23 @@ namespace EDPA.Services
                 try
                 {
                     var json = File.ReadAllText(file);
-                    var cacheEntry = JsonSerializer.Deserialize<CacheEntry<object>>(json);
-                    if (cacheEntry != null && IsExpired(cacheEntry.CreatedAt, _cacheDuration))
+
+                    // Simple regex to extract the createdAt date without full JSON parsing
+                    var match = System.Text.RegularExpressions.Regex.Match(
+                        json,
+                        @"""createdAt"":\s*""([^""]+)""");
+
+                    if (match.Success &&
+                        DateTime.TryParse(match.Groups[1].Value, out var createdAt) &&
+                        IsExpired(createdAt, _cacheDuration))
                     {
                         File.Delete(file);
+                        Console.WriteLine($"Deleted expired cache: {Path.GetFileName(file)}");
                     }
                 }
                 catch
                 {
-                    // Delete corrupted cache files
+                    // If anything fails, delete the corrupted file
                     File.Delete(file);
                 }
             }
@@ -96,7 +104,12 @@ namespace EDPA.Services
         private async Task<CacheEntry<T>> ReadCacheEntry<T>(string filePath)
         {
             var json = await File.ReadAllTextAsync(filePath);
-            return JsonSerializer.Deserialize<CacheEntry<T>>(json);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true // Important for deserialization
+            };
+            return JsonSerializer.Deserialize<CacheEntry<T>>(json, options);
         }
 
         private async Task WriteCacheEntry<T>(string filePath, T data)
@@ -107,11 +120,14 @@ namespace EDPA.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            var json = JsonSerializer.Serialize(cacheEntry, new JsonSerializerOptions
+            var jsonOptions = new JsonSerializerOptions
             {
-                WriteIndented = true
-            });
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase, // Ensure consistent naming
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            };
 
+            var json = JsonSerializer.Serialize(cacheEntry, jsonOptions);
             await File.WriteAllTextAsync(filePath, json);
         }
 

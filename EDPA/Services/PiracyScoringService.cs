@@ -52,7 +52,7 @@ namespace EDPA.Services
                 if (!_systemCache.TryGetValue(systemName, out systemData))
                 {
                     // First try to get data from Spansh
-                    var systems = await _spanshSearcher.SearchSystemsNearReference(systemName, 0, 1);
+                    var systems = await _spanshSearcher.SearchSystemsNearReference(systemName, 0);
                     systemData = systems?.FirstOrDefault(s => s.Name.Equals(systemName, StringComparison.OrdinalIgnoreCase));
 
                     // If not found in Spansh, fall back to EDSM
@@ -78,7 +78,7 @@ namespace EDPA.Services
 
             var result = new PiracyScoreResult { SystemName = systemData.Name };
 
-            // Calculate all component scores except market demand
+            // Calculate all component scores
             result.EconomyScore = CalculateEconomyScore(systemData.Economy, systemData.SecondEconomy) * _config.EconomyScoreWeight;
             result.NoRingsScore = CalculateNoRingsScore(systemData) * _config.NoRingsScoreWeight;
             result.GovernmentScore = CalculateGovernmentScore(systemData.Government) * _config.GovernmentScoreWeight;
@@ -101,11 +101,23 @@ namespace EDPA.Services
             // Scale to 0-100 for comparison
             double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
 
-            // Only calculate market demand if the score is already 70+
-            if (scoreWithoutMarketScaled >= 70)
+            // Check if we already have market data in the cached system
+            bool hasMarketData = systemData.BestCommoditie != null && systemData.BestCommoditie.Count > 0;
+
+            if (scoreWithoutMarketScaled >= 70 || hasMarketData)
             {
                 result.SkippedMarket = false;
-                result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
+
+                if (hasMarketData)
+                {
+                    // Use existing market data from cache
+                    result.MarketDemandScore = CalculateMarketDemandScoreFromExistingData(systemData) * _config.MarketDemandScoreWeight;
+                }
+                else
+                {
+                    // Fetch new market data
+                    result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
+                }
             }
             else
             {
@@ -114,7 +126,7 @@ namespace EDPA.Services
             }
 
             // Calculate final score
-            result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2);
+            result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2) * 100;
 
             // Get Best Commodity for display
             result.BestCommodity = GetBestCommoditySimple(systemData);
@@ -124,59 +136,6 @@ namespace EDPA.Services
             {
                 _resultCache[systemName] = result;
             }
-
-            return result;
-        }
-
-        // Add this method to your PiracyScoringService class
-        public async Task<PiracyScoreResult> CalculateSystemScoreFromData(SystemData systemData)
-        {
-            if (systemData == null)
-            {
-                return null;
-            }
-
-            var result = new PiracyScoreResult { SystemName = systemData.Name };
-
-            // Calculate all component scores except market demand
-            result.EconomyScore = CalculateEconomyScore(systemData.Economy, systemData.SecondEconomy) * _config.EconomyScoreWeight;
-            result.NoRingsScore = CalculateNoRingsScore(systemData) * _config.NoRingsScoreWeight;
-            result.GovernmentScore = CalculateGovernmentScore(systemData.Government) * _config.GovernmentScoreWeight;
-            result.SecurityScore = CalculateSecurityScore(systemData.Security) * _config.SecurityScoreWeight;
-            result.FactionStateScore = CalculateFactionStateScore(systemData.FactionState) * _config.FactionStateScoreWeight;
-            result.PopulationScore = CalculatePopulationScore(systemData.Population, _config.PopulationMultipliers) * _config.PopulationScoreWeight;
-
-            result.HasIndustrialEconomy = systemData.Economy == "Industrial";
-            result.HasExtractionEconomy = systemData.Economy == "Extraction";
-            result.HasNoRings = systemData.Rings.Count == 0;
-            result.HasAnarchyGovernment = systemData.Government == "Anarchy";
-            result.HasLowSecurity = systemData.Security == "Low" || systemData.Security == "None" || systemData.Security == "Anarchy";
-            result.HasPirateFaction = systemData.MinorFactionPresences.Any(f => f.Name.Contains("Pirate") || f.Name.Contains("Criminal"));
-
-            // Calculate score without market demand
-            double scoreWithoutMarket = result.EconomyScore + result.NoRingsScore +
-                                       result.GovernmentScore + result.SecurityScore +
-                                       result.FactionStateScore + result.PopulationScore;
-
-            // Scale to 0-100 for comparison
-            double scoreWithoutMarketScaled = scoreWithoutMarket * 100;
-
-            // Only calculate market demand if the score is already 70+
-            if (scoreWithoutMarketScaled >= 70)
-            {
-                result.SkippedMarket = false;
-                result.MarketDemandScore = await CalculateMarketDemandScore(systemData) * _config.MarketDemandScoreWeight;
-            }
-            else
-            {
-                result.SkippedMarket = true;
-                result.MarketDemandScore = 0;
-            }
-
-            result.BestCommodity = GetBestCommoditySimple(systemData);
-
-            // Calculate final score
-            result.FinalScore = Math.Round(scoreWithoutMarket + result.MarketDemandScore, 2);
 
             return result;
         }
@@ -259,20 +218,13 @@ namespace EDPA.Services
 
         public CommodityMarket GetBestCommoditySimple(SystemData systemData)
         {
-            var bestCommodity = new CommodityMarket();
-            foreach (var commodities in systemData.BestCommoditie)
-            {
-                if (commodities == null)
-                    return null;
-
-                if (commodities.Demand > bestCommodity.Demand)
-                {
-                    bestCommodity = commodities;
-                }
-
-            }
-
-            return bestCommodity;
+            return systemData?.BestCommoditie?
+                .Where(commodity => commodity != null && commodity.Demand > 0)
+                .OrderByDescending(commodity => _config.ValuableCommodities.ContainsKey(commodity.Name)
+                    ? _config.ValuableCommodities[commodity.Name]
+                    : 0)  // Priority 1: Highest weight first
+                .ThenByDescending(commodity => commodity.Demand)  // Priority 2: Highest demand for tie-breaking
+                .FirstOrDefault();
         }
 
         public double CalculatePopulationScore(long population, Dictionary<string, double> multipliers)
@@ -298,9 +250,13 @@ namespace EDPA.Services
         }
         private async Task<double> CalculateMarketDemandScore(SystemData systemData)
         {
+            // Clear any existing data to avoid duplicates
+            systemData.BestCommoditie.Clear();
+
             if (systemData.Stations.Count == 0) return 0;
 
             double bestScore = 0;
+            bool foundCommodities = false;
 
             // Get market data for each station with a market
             foreach (var station in systemData.Stations.Where(s => s.HaveMarket && s.MarketId > 0))
@@ -310,13 +266,17 @@ namespace EDPA.Services
                 {
                     foreach (var commodity in marketData.Commodities)
                     {
-                        _config.DemandThresholds.TryGetValue("High", out var thresholds);
+                        // Use the correct threshold - fix this line
+                        double highThreshold = _config.DemandThresholds.ContainsKey("High")
+                            ? _config.DemandThresholds["High"]
+                            : 10000; // Default threshold
 
-                        if (_config.ValuableCommodities.ContainsKey(commodity.Name) && commodity.Demand >= thresholds)
+                        if (_config.ValuableCommodities.ContainsKey(commodity.Name) &&
+                            commodity.Demand >= highThreshold)
                         {
                             if (_config.ValuableCommodities.TryGetValue(commodity.Name, out double multiplier))
                             {
-                                systemData.BestCommoditie.Add(new CommodityMarket
+                                var commodityMarket = new CommodityMarket
                                 {
                                     Name = commodity.Name,
                                     BuyPrice = commodity.BuyPrice,
@@ -325,7 +285,10 @@ namespace EDPA.Services
                                     Stock = commodity.Stock,
                                     DemandBracket = commodity.DemandBracket,
                                     StockBracket = commodity.StockBracket
-                                });
+                                };
+
+                                systemData.BestCommoditie.Add(commodityMarket);
+                                foundCommodities = true;
 
                                 if (multiplier > bestScore)
                                 {
@@ -337,6 +300,26 @@ namespace EDPA.Services
                 }
             }
 
+            Console.WriteLine($"Found {systemData.BestCommoditie.Count} commodities for {systemData.Name}");
+            return bestScore;
+        }
+
+        private double CalculateMarketDemandScoreFromExistingData(SystemData systemData)
+        {
+            if (systemData.BestCommoditie == null || systemData.BestCommoditie.Count == 0)
+                return 0;
+
+            double bestScore = 0;
+            foreach (var commodity in systemData.BestCommoditie)
+            {
+                if (_config.ValuableCommodities.TryGetValue(commodity.Name, out double multiplier))
+                {
+                    if (multiplier > bestScore)
+                    {
+                        bestScore = multiplier;
+                    }
+                }
+            }
             return bestScore;
         }
 

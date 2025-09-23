@@ -49,11 +49,10 @@ namespace EDPA.WPF.Views.Pages
             {
                 SaveButton.Visibility = Visibility.Collapsed;
 
-                // Optional: Show a message or different button for already saved systems
                 if (_isAlreadySaved)
                 {
                     AlreadySavedText.Visibility = Visibility.Visible;
-                    RemoveButton.Visibility = Visibility.Visible; // Optional: Add remove functionality
+                    RemoveButton.Visibility = Visibility.Visible;
                 }
             }
             else
@@ -103,7 +102,6 @@ namespace EDPA.WPF.Views.Pages
             SnackbarHelper.ShowSuccess($"{_scoreResult.SystemName} has been saved!");
         }
 
-        // Optional: Add remove functionality for already saved systems
         private async void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
             if (!_isAlreadySaved) return;
@@ -119,7 +117,7 @@ namespace EDPA.WPF.Views.Pages
                     ApplicationStateService.Instance.SavedSystemResults.Remove(systemToRemove);
                 }
 
-                // Remove from system data
+                // Remove from system saved data
                 var systemDataToRemove = ApplicationStateService.Instance.systemSavedData
                     ?.FirstOrDefault(sd => sd.Name == _scoreResult.SystemName);
 

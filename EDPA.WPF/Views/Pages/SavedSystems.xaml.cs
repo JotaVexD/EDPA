@@ -1,5 +1,6 @@
 using EDPA.Models;
 using EDPA.WPF.Services;
+using EDPA.WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -42,7 +43,7 @@ namespace EDPA.WPF.Views.Pages
                 // Load saved systems from persistent storage
                 await ApplicationStateService.Instance.LoadSavedSystemsAsync();
 
-                // Load previous state (only the search text, not max distance)
+                // Load previous state (search text and systemSavedData)
                 SearchTextBox.Text = ApplicationStateService.Instance.ReferenceSavedSystem;
                 _systemsSavedData = ApplicationStateService.Instance.systemSavedData;
 
@@ -186,17 +187,7 @@ namespace EDPA.WPF.Views.Pages
             {
                 await ApplicationStateService.Instance.SaveSavedSystemsAsync();
 
-                var expirationMessage = $"Removed {expiredCount} expired system(s). Data was older than 12 hours.";
-                StatusLabel.Text = expirationMessage;
-
-                Dispatcher.BeginInvoke(new Action(async () =>
-                {
-                    await Task.Delay(5000);
-                    if (StatusLabel.Text == expirationMessage)
-                    {
-                        UpdateUIState();
-                    }
-                }), System.Windows.Threading.DispatcherPriority.Background);
+                SnackbarHelper.ShowInfo($"Removed {expiredCount} expired system(s). Data was older than 24 hours.");
             }
         }
 

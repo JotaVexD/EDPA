@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EDPA.WPF": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    }
+  }
+}
