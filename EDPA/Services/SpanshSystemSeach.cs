@@ -15,6 +15,7 @@ namespace EDPA.Services
         private readonly HttpClient _httpClient;
         private readonly CacheService _cacheService;
         private const int MaxPageSize = 500;
+        private int page;
 
         public SpanshSystemSearch(CacheService cacheService)
         {
@@ -54,6 +55,7 @@ namespace EDPA.Services
         {
             // Create a unique cache key for this search
             var cacheKey = $"Search_{referenceSystem}_{maxDistanceLy}";
+            page = 0;
 
             return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
             {
@@ -142,7 +144,6 @@ namespace EDPA.Services
                 },
                 sort = Array.Empty<object>(),
                 size = MaxPageSize, // Get maximum systems per page
-                page = 0,
                 reference_system = referenceSystem
             };
 
@@ -171,14 +172,17 @@ namespace EDPA.Services
         private async Task<List<SystemData>> GetAllSearchResults(string searchReference)
         {
             var systems = new List<SystemData>();
-            int from = 0;
             bool hasMoreResults = true;
 
             while (hasMoreResults)
             {
                 try
                 {
-                    var url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}?from={from}";
+                    var url = "";
+                    if (page == 0)
+                        url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}";
+                    else
+                        url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}/{page}";
 
                     using var request = new HttpRequestMessage(HttpMethod.Get, url);
                     var response = await _httpClient.SendAsync(request);
@@ -217,8 +221,7 @@ namespace EDPA.Services
                     }
                     else
                     {
-                        // Update 'from' for next page
-                        from += pageSystems.Count;
+                        page += 1;
 
                         // Add a small delay to be respectful to the API
                         await Task.Delay(200);
@@ -226,7 +229,7 @@ namespace EDPA.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error retrieving page starting from {from}: {ex.Message}");
+                    Console.WriteLine($"Error retrieving page starting from {page}: {ex.Message}");
                     hasMoreResults = false;
                 }
             }
