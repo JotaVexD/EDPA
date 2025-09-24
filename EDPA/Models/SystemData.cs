@@ -18,6 +18,8 @@
         public List<Station> Stations { get; set; } = new List<Station>();
         public List<CommodityMarket> CommodityMarkets { get; set; } = new List<CommodityMarket>();
         public List<CommodityMarket> BestCommoditie { get; set; } = new List<CommodityMarket>();
+        public List<PiracyScoreResult> SystemScore { get; set; } = new List<PiracyScoreResult>();
+
         public int TotalDemand { get; set; }
         public int ValuableCommodityDemand { get; set; }
 

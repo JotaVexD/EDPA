@@ -1,5 +1,6 @@
 ﻿using EDPA.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -14,14 +15,21 @@ namespace EDPA.Services
     {
         private readonly HttpClient _httpClient;
         private readonly CacheService _cacheService;
+        private PiracyScoringService _piracyScoringService;
         private const int MaxPageSize = 500;
         private int page;
+        public List<PiracyScoreResult> systemsScore { get; set; }
 
         public SpanshSystemSearch(CacheService cacheService)
         {
             _httpClient = new HttpClient();
             _cacheService = cacheService ?? new CacheService(TimeSpan.FromHours(24));
             SetupDefaultHeaders();
+        }
+
+        public List<PiracyScoreResult> GetResult()
+        {
+            return systemsScore;
         }
 
         public CacheService GetCacheService()
@@ -51,10 +59,12 @@ namespace EDPA.Services
             _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
         }
 
-        public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy)
+        public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy, PiracyScoringService piracyScoringService)
         {
+            //systemsScore = new List<PiracyScoreResult>();
             // Create a unique cache key for this search
             var cacheKey = $"Search_{referenceSystem}_{maxDistanceLy}";
+            _piracyScoringService = piracyScoringService;
             page = 0;
 
             return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
@@ -172,69 +182,81 @@ namespace EDPA.Services
         private async Task<List<SystemData>> GetAllSearchResults(string searchReference)
         {
             var systems = new List<SystemData>();
+            var semaphore = new SemaphoreSlim(50); // Limit concurrent scoring tasks
             bool hasMoreResults = true;
 
             while (hasMoreResults)
             {
                 try
                 {
-                    var url = "";
-                    if (page == 0)
-                        url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}";
-                    else
-                        url = $"https://spansh.co.uk/api/systems/search/recall/{searchReference}/{page}";
+                    var url = page == 0
+                        ? $"https://spansh.co.uk/api/systems/search/recall/{searchReference}"
+                        : $"https://spansh.co.uk/api/systems/search/recall/{searchReference}/{page}";
 
-                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                    var response = await _httpClient.SendAsync(request);
+                    using var response = await _httpClient.GetAsync(url);
                     response.EnsureSuccessStatusCode();
 
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    using JsonDocument doc = JsonDocument.Parse(responseBody);
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(responseBody);
                     var root = doc.RootElement;
 
-                    // Check if we have results
                     if (!root.TryGetProperty("results", out var resultsElement) ||
-                        resultsElement.ValueKind != JsonValueKind.Array ||
-                        !resultsElement.EnumerateArray().Any())
+                        resultsElement.ValueKind != JsonValueKind.Array)
                     {
-                        break; // No more results
+                        break;
                     }
 
-                    // Parse systems from current page
-                    var pageSystems = new List<SystemData>();
-                    foreach (var system in resultsElement.EnumerateArray())
+                    // Parse systems in parallel
+                    var systemsArray = resultsElement.EnumerateArray().ToArray();
+                    var pageSystems = new ConcurrentBag<SystemData>();
+                    var scoringTasks = new List<Task>();
+
+                    foreach (var system in systemsArray)
                     {
-                        var systemData = ParseSystemData(system);
-                        if (systemData != null)
+                        if (system.TryGetProperty("name", out var name) && name.GetString() == "Test")
+                            continue;
+
+                        await semaphore.WaitAsync();
+                        scoringTasks.Add(Task.Run(async () =>
                         {
-                            pageSystems.Add(systemData);
-                        }
+                            try
+                            {
+                                var systemData = ParseSystemData(system);
+                                if (systemData != null)
+                                {
+                                    var scoreResult = await _piracyScoringService.CalculateSystemScore(systemData: systemData);
+                                    systemData.SystemScore = new List<PiracyScoreResult> { scoreResult };
+                                    pageSystems.Add(systemData);
+                                }
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        }));
                     }
 
-                    // Add all systems from this page
+                    await Task.WhenAll(scoringTasks);
                     systems.AddRange(pageSystems);
 
-                    // Check if this was the last page (fewer results than max page size)
-                    if (pageSystems.Count < MaxPageSize)
+                    // Check if last page
+                    if (systemsArray.Length < MaxPageSize)
                     {
                         hasMoreResults = false;
                     }
                     else
                     {
-                        page += 1;
-
-                        // Add a small delay to be respectful to the API
-                        await Task.Delay(200);
+                        page++;
+                        await Task.Delay(100); // Reduced delay
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error retrieving page starting from {page}: {ex.Message}");
+                    Console.WriteLine($"Error retrieving page {page}: {ex.Message}");
                     hasMoreResults = false;
                 }
             }
 
-            Console.WriteLine($"Retrieved {systems.Count} systems total");
             return systems;
         }
 

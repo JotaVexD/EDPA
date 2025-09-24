@@ -41,7 +41,7 @@ namespace EDPA.WPF.Services
         public event PropertyChangedEventHandler PropertyChanged;
 
         // Search-related properties (not persisted)
-        public ObservableCollection<PiracyScoreResult> SearchResults { get; set; } = new ObservableCollection<PiracyScoreResult>();
+        public List<PiracyScoreResult> SearchResults { get; set; } = new List<PiracyScoreResult>();
         public List<SystemData> systemData { get; set; } = new List<SystemData>();
         public string ReferenceSystem { get; set; } = "Sol";
         public int MaxDistance { get; set; } = 10;

@@ -51,23 +51,23 @@ namespace EDPA.Services
                 // Check system data cache
                 if (!_systemCache.TryGetValue(systemName, out systemData))
                 {
-                    // First try to get data from Spansh
-                    var systems = await _spanshSearcher.SearchSystemsNearReference(systemName, 0);
-                    systemData = systems?.FirstOrDefault(s => s.Name.Equals(systemName, StringComparison.OrdinalIgnoreCase));
+                    //// First try to get data from Spansh
+                    //var systems = await _spanshSearcher.SearchSystemsNearReference(systemName, 0);
+                    //systemData = systems?.FirstOrDefault(s => s.Name.Equals(systemName, StringComparison.OrdinalIgnoreCase));
 
-                    // If not found in Spansh, fall back to EDSM
+                    //// If not found in Spansh, fall back to EDSM
                     if (systemData == null)
                     {
                         systemData = await _edsmService.GetCompleteSystemData(systemName);
                     }
 
-                    if (systemData == null)
-                    {
-                        return null;
-                    }
+                    //if (systemData == null)
+                    //{
+                    //    return null;
+                    //}
 
-                    // Cache the system data
-                    _systemCache[systemName] = systemData;
+                    //// Cache the system data
+                    //_systemCache[systemName] = systemData;
                 }
             }
 
@@ -104,7 +104,7 @@ namespace EDPA.Services
             // Check if we already have market data in the cached system
             bool hasMarketData = systemData.BestCommoditie != null && systemData.BestCommoditie.Count > 0;
 
-            if (scoreWithoutMarketScaled >= 70 || hasMarketData)
+            if (scoreWithoutMarketScaled >= 90 || hasMarketData)
             {
                 result.SkippedMarket = false;
 
@@ -136,6 +136,8 @@ namespace EDPA.Services
             {
                 _resultCache[systemName] = result;
             }
+
+            systemData.SystemScore.Add(result);
 
             return result;
         }

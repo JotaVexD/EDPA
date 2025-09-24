@@ -1,4 +1,5 @@
 ﻿using EDPA.Models;
+using EDPA.Models.EDSM;
 using EDPA.Services;
 using EDPA.WPF.Services;
 using EDPA.WPF.ViewModels;
@@ -194,7 +195,7 @@ namespace EDPA.WPF.Views.Pages
                 StatusLabel.Text = $"Searching for systems near {referenceSystem} (within {maxDistance} ly)...";
 
                 // Use the SpanshSystemSearch class to get complete system data
-                var systems = await _spanshSearcher.SearchSystemsNearReference(referenceSystem, maxDistance);
+                var systems = await _spanshSearcher.SearchSystemsNearReference(referenceSystem, maxDistance,_scoringService);
 
                 StatusLabel.Text = $"Found {systems.Count} systems near {referenceSystem} (within {maxDistance} ly). Analyzing...";
 
@@ -229,68 +230,15 @@ namespace EDPA.WPF.Views.Pages
             int maxDistance = (int)MaxDistanceSlider.Value;
             var cacheKey = $"Search_{referenceSystem}_{maxDistance}";
 
-            ProgressBar.Value = 0;
-            ProgressBar.Maximum = systemsData.Count;
-            ProgressBar.Visibility = Visibility.Visible;
-
-            var progress = new Progress<AnalysisProgress>(report =>
-            {
-                ProgressBar.Value = report.Current;
-                if (report.Result != null)
-                {
-                    ApplicationStateService.Instance.SearchResults.Add(report.Result);
-                    _resultsView.Refresh();
-                }
-                StatusLabel.Text = $"Analyzing... ({report.Current}/{report.Total}) - {report.SystemName}";
-            });
-
             try
             {
-                var semaphore = new SemaphoreSlim(5, 5);
-                var tasks = new List<Task>();
 
-                int completedCount = 0;
-                var progressHandler = (IProgress<AnalysisProgress>)progress;
-
-                foreach (var systemData in systemsData)
+                foreach (var system in systemsData)
                 {
-                    await semaphore.WaitAsync();
-
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        try
-                        {
-                            var result = await _scoringService.CalculateSystemScore(systemData: systemData);
-
-                            if (result != null)
-                            {
-                                Interlocked.Increment(ref completedCount);
-                                progressHandler.Report(new AnalysisProgress
-                                {
-                                    Current = completedCount,
-                                    Total = systemsData.Count,
-                                    SystemName = systemData.Name,
-                                    Result = result
-                                });
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            await Dispatcher.InvokeAsync(async () =>
-                            {
-                                await ShowUiMessageAsync("Analysis Error", $"Error analyzing {systemData.Name}: {ex.Message}", "OK");
-                            });
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    }));
+                    ApplicationStateService.Instance.SearchResults.AddRange(system.SystemScore);
+                    _resultsView.Refresh();
                 }
 
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-
-                await UpdateSearchCacheWithEnrichedData(cacheKey, systemsData);
             }
             catch (Exception ex)
             {
@@ -299,6 +247,8 @@ namespace EDPA.WPF.Views.Pages
                     await ShowUiMessageAsync("Analysis Error", $"Error during analysis: {ex.Message}", "OK");
                 });
             }
+
+            
 
             await Dispatcher.InvokeAsync(() =>
             {
@@ -316,53 +266,9 @@ namespace EDPA.WPF.Views.Pages
                 }
 
                 ProgressBar.Visibility = Visibility.Collapsed;
+                //_resultsView.Refresh();
                 UpdateUIState();
             });
-        }
-
-        private async Task UpdateSearchCacheWithEnrichedData(string cacheKey, List<SystemData> systemsData)
-        {
-            try
-            {
-                // Get the cache file path
-                var cacheService = _spanshSearcher.GetCacheService();
-                                                                      
-                var cacheDirectory = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "EDPA",
-                    "Cache"
-                );
-                var safeKey = string.Join("_", cacheKey.Split(Path.GetInvalidFileNameChars()));
-                var cacheFile = Path.Combine(cacheDirectory, $"{safeKey}.json");
-
-                if (File.Exists(cacheFile))
-                {
-                    // Read the existing cache entry
-                    var json = await File.ReadAllTextAsync(cacheFile);
-                    var cacheEntry = JsonSerializer.Deserialize<CacheEntry<List<SystemData>>>(json);
-
-                    if (cacheEntry != null)
-                    {
-                        // Update the data with our enriched systems
-                        cacheEntry.Data = systemsData;
-                        cacheEntry.CreatedAt = DateTime.UtcNow;
-
-                        // Save back to file
-                        var updatedJson = JsonSerializer.Serialize(cacheEntry, new JsonSerializerOptions
-                        {
-                            WriteIndented = true,
-                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                        });
-
-                        await File.WriteAllTextAsync(cacheFile, updatedJson);
-                        Console.WriteLine($"Updated cache file: {cacheFile}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error updating search cache: {ex.Message}");
-            }
         }
 
         private void ClosePopup_Click(object sender, RoutedEventArgs e)
