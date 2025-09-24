@@ -134,24 +134,24 @@
                                 <TextBlock VerticalAlignment="Bottom" Text="Basic Information" Style="{StaticResource SectionHeaderStyle}"/>
                                 <StackPanel Orientation="Horizontal" Margin="10,0,0,8">
                                     <ui:SymbolIcon Symbol="Star24" 
-                                Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
-                                Margin="0,0,2,0"
-                                Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=1}"/>
+                                        Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                        Margin="0,0,2,0"
+                                        Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=1}"/>
                                     <ui:SymbolIcon Symbol="Star24" 
-                                Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
-                                Margin="0,0,2,0"
-                                Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=2}"/>
+                                        Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                        Margin="0,0,2,0"
+                                        Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=2}"/>
                                     <ui:SymbolIcon Symbol="Star24" 
-                                Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
-                                Margin="0,0,2,0"
-                                Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=3}"/>
+                                        Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                        Margin="0,0,2,0"
+                                        Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=3}"/>
                                     <ui:SymbolIcon Symbol="Star24" 
-                                Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
-                                Margin="0,0,2,0"
-                                Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=4}"/>
+                                        Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                        Margin="0,0,2,0"
+                                        Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=4}"/>
                                     <ui:SymbolIcon Symbol="Star24" 
-                                Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
-                                Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=5}"/>
+                                        Foreground="{Binding FinalScore, Converter={StaticResource ScoreToColorConverter}}"
+                                        Visibility="{Binding FinalScore, Converter={StaticResource ScoreToStarVisibilityConverter}, ConverterParameter=5}"/>
                                 </StackPanel>
                             </StackPanel>
 
@@ -287,81 +287,62 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- No Rings Score -->
-                                <TextBlock Text="No Rings:" Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
-                                <ProgressBar Grid.Row="0" Grid.Column="1" 
-                            Value="{Binding NoRingsScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='NoRings'}" 
-                            Maximum="100"
-                            Height="8"
-                            Margin="0,0,8,8"
-                            VerticalAlignment="Center"
-                            Foreground="{Binding NoRingsScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='NoRings'}"/>
-                                <TextBlock Text="{Binding NoRingsDescription}" 
-                            Grid.Row="1" Grid.Column="1" 
-                            Style="{StaticResource ValueStyle}"
-                            Margin="0,-8,8,16"
-                            VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding NoRingsScore, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='NoRings', StringFormat='{}{0:F0}%'}" 
-                            Grid.Row="0" Grid.Column="2" 
-                            Style="{StaticResource ValueStyle}"
-                            HorizontalAlignment="Center"/>
-
                                 <!-- Security Score -->
-                                <TextBlock Text="Security:" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
-                                <ProgressBar Grid.Row="2" Grid.Column="1" 
-                            Value="{Binding SecurityScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='Security'}" 
-                            Maximum="100"
-                            Height="8"
-                            Margin="0,0,8,8"
-                            VerticalAlignment="Center"
-                            Foreground="{Binding SecurityScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='Security'}"/>
+                                <TextBlock Text="Security:" Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                                <ProgressBar Grid.Row="0" Grid.Column="1" 
+                                    Value="{Binding SecurityScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='Security'}" 
+                                    Maximum="100"
+                                    Height="8"
+                                    Margin="0,0,8,8"
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding SecurityScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='Security'}"/>
                                 <TextBlock Text="{Binding SecurityDescription}" 
-                            Grid.Row="3" Grid.Column="1" 
-                            Style="{StaticResource ValueStyle}"
-                            Margin="0,-8,8,16"
-                            VerticalAlignment="Center"/>
+                                    Grid.Row="1" Grid.Column="1" 
+                                    Style="{StaticResource ValueStyle}"
+                                    Margin="0,-8,8,16"
+                                    VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding SecurityScore, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='Security', StringFormat='{}{0:F0}%'}" 
-                            Grid.Row="2" Grid.Column="2" 
-                            Style="{StaticResource ValueStyle}"
-                            HorizontalAlignment="Right"/>
+                                    Grid.Row="0" Grid.Column="2" 
+                                    Style="{StaticResource ValueStyle}"
+                                    HorizontalAlignment="Right"/>
 
                                 <!-- Faction State Score -->
-                                <TextBlock Text="Faction State:" Grid.Row="4" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
-                                <ProgressBar Grid.Row="4" Grid.Column="1" 
-                            Value="{Binding FactionStateScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='FactionState'}" 
-                            Maximum="100"
-                            Height="8"
-                            Margin="0,0,8,8"
-                            VerticalAlignment="Center"
-                            Foreground="{Binding FactionStateScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='FactionState'}"/>
+                                <TextBlock Text="Faction State:" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                                <ProgressBar Grid.Row="2" Grid.Column="1" 
+                                    Value="{Binding FactionStateScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='FactionState'}" 
+                                    Maximum="100"
+                                    Height="8"
+                                    Margin="0,0,8,8"
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding FactionStateScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='FactionState'}"/>
                                 <TextBlock Text="{Binding FactionStateDescription}" 
-                            Grid.Row="5" Grid.Column="1" 
-                            Style="{StaticResource ValueStyle}"
-                            Margin="0,-8,8,16"
-                            VerticalAlignment="Center"/>
+                                    Grid.Row="3" Grid.Column="1" 
+                                    Style="{StaticResource ValueStyle}"
+                                    Margin="0,-8,8,16"
+                                    VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding FactionStateScore, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='FactionState', StringFormat='{}{0:F0}%'}" 
-                            Grid.Row="4" Grid.Column="2" 
-                            Style="{StaticResource ValueStyle}"
-                            HorizontalAlignment="Right"/>
+                                    Grid.Row="2" Grid.Column="2" 
+                                    Style="{StaticResource ValueStyle}"
+                                    HorizontalAlignment="Right"/>
 
                                 <!-- Market Demand Score -->
-                                <TextBlock Text="Market Demand:" Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
-                                <ProgressBar Grid.Row="6" Grid.Column="1" 
-                            Value="{Binding MarketDemandScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='MarketDemand'}" 
-                            Maximum="100"
-                            Height="8"
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Center"
-                            Foreground="{Binding MarketDemandScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='MarketDemand'}"/>
+                                <TextBlock Text="Market Demand:" Grid.Row="4" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                                <ProgressBar Grid.Row="4" Grid.Column="1" 
+                                    Value="{Binding MarketDemandScore, Mode=OneWay, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='MarketDemand'}" 
+                                    Maximum="100"
+                                    Height="8"
+                                    Margin="0,0,8,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{Binding MarketDemandScore, Converter={StaticResource WeightToColorConverter}, ConverterParameter='MarketDemand'}"/>
                                 <TextBlock Text="{Binding MarketDemandDescription}" 
-                            Grid.Row="7" Grid.Column="1" 
-                            Style="{StaticResource ValueStyle}"
-                            Margin="0,-8,8,16"
-                            VerticalAlignment="Center"/>
+                                    Grid.Row="5" Grid.Column="1" 
+                                    Style="{StaticResource ValueStyle}"
+                                    Margin="0,-8,8,16"
+                                    VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding MarketDemandScore, Converter={StaticResource ScoreToPercentageConverter}, ConverterParameter='MarketDemand', StringFormat='{}{0:F0}%'}" 
-                            Grid.Row="6" Grid.Column="2" 
-                            Style="{StaticResource ValueStyle}"
-                            HorizontalAlignment="Right"/>
+                                    Grid.Row="4" Grid.Column="2" 
+                                    Style="{StaticResource ValueStyle}"
+                                    HorizontalAlignment="Right"/>
                             </Grid>
                         </StackPanel>
                     </Border>

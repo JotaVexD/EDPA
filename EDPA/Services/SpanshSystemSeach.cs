@@ -1,7 +1,7 @@
 ﻿using EDPA.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Numerics;
@@ -14,31 +14,14 @@ namespace EDPA.Services
     public class SpanshSystemSearch
     {
         private readonly HttpClient _httpClient;
-        private readonly CacheService _cacheService;
-        private PiracyScoringService _piracyScoringService;
         private const int MaxPageSize = 500;
         private int page;
-        public List<PiracyScoreResult> systemsScore { get; set; }
 
-        public SpanshSystemSearch(CacheService cacheService)
+        public SpanshSystemSearch()
         {
             _httpClient = new HttpClient();
-            _cacheService = cacheService ?? new CacheService(TimeSpan.FromHours(24));
             SetupDefaultHeaders();
         }
-
-        public List<PiracyScoreResult> GetResult()
-        {
-            return systemsScore;
-        }
-
-        public CacheService GetCacheService()
-        {
-            return _cacheService;
-        }
-
-        // Keep your existing constructor for backward compatibility
-        public SpanshSystemSearch() : this(new CacheService(TimeSpan.FromHours(24))) { }
 
         private void SetupDefaultHeaders()
         {
@@ -59,89 +42,59 @@ namespace EDPA.Services
             _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
         }
 
-        public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy, PiracyScoringService piracyScoringService)
+        public async Task<List<SystemData>> SearchSystemsNearReference(string referenceSystem, int maxDistanceLy)
         {
-            //systemsScore = new List<PiracyScoreResult>();
-            // Create a unique cache key for this search
-            var cacheKey = $"Search_{referenceSystem}_{maxDistanceLy}";
-            _piracyScoringService = piracyScoringService;
             page = 0;
 
-            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
+            try
             {
-                try
+                var searchReference = await CreateSearch(referenceSystem, maxDistanceLy);
+                if (string.IsNullOrEmpty(searchReference))
                 {
-                    // Step 1: Create the search request
-                    var searchReference = await CreateSearch(referenceSystem, maxDistanceLy);
-
-                    if (string.IsNullOrEmpty(searchReference))
-                    {
-                        throw new Exception("Failed to create search - no search reference returned");
-                    }
-
-                    // Add a small delay to ensure the search is ready
-                    await Task.Delay(500);
-
-                    // Step 2: Retrieve ALL search results with pagination
-                    var systems = await GetAllSearchResults(searchReference);
-                    return systems;
+                    throw new Exception("Failed to create search - no search reference returned");
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error in Spansh system search: {ex.Message}");
-                    // Fall back to individual system lookup
-                    return await GetSystemDataFallback(referenceSystem);
-                }
-            });
+
+                await Task.Delay(500);
+
+                var systems = await GetAllSearchResults(searchReference);
+                return systems;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Spansh system search: {ex.Message}");
+                return await GetSystemDataFallback(referenceSystem);
+            }
         }
 
         private async Task<List<SystemData>> GetSystemDataFallback(string systemName)
         {
-            var cacheKey = $"System_{systemName}";
-
-            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
-            {
-                try
-                {
-                    var url = $"https://spansh.co.uk/api/systems/{Uri.EscapeDataString(systemName)}";
-
-                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                    var response = await _httpClient.SendAsync(request);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(responseBody);
-                        var systemElement = doc.RootElement;
-
-                        var systemData = ParseSystemData(systemElement);
-                        return new List<SystemData> { systemData };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Fallback API call failed: {ex.Message}");
-                }
-
-                return new List<SystemData>();
-            });
-        }
-
-        public async Task UpdateSearchCache(string cacheKey, List<SystemData> systemsData)
-        {
             try
             {
-                await _cacheService.GetOrCreateAsync(cacheKey, async () => systemsData, TimeSpan.FromHours(24));
+                var url = $"https://spansh.co.uk/api/systems/{Uri.EscapeDataString(systemName)}";
+
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                var response = await _httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(responseBody);
+                    var systemElement = doc.RootElement;
+
+                    var systemData = ParseSystemDataOptimized(systemElement);
+                    return new List<SystemData> { systemData };
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error updating search cache: {ex.Message}");
+                Console.WriteLine($"Fallback API call failed: {ex.Message}");
             }
+
+            return new List<SystemData>();
         }
 
         private async Task<string> CreateSearch(string referenceSystem, int maxDistanceLy)
         {
-            // Use MaxPageSize to get the maximum systems per page
             var payload = new
             {
                 filters = new
@@ -153,7 +106,7 @@ namespace EDPA.Services
                     }
                 },
                 sort = Array.Empty<object>(),
-                size = MaxPageSize, // Get maximum systems per page
+                size = MaxPageSize,
                 reference_system = referenceSystem
             };
 
@@ -167,7 +120,6 @@ namespace EDPA.Services
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
-            // Parse the response to get the search reference
             using JsonDocument doc = JsonDocument.Parse(responseBody);
             var root = doc.RootElement;
 
@@ -182,7 +134,7 @@ namespace EDPA.Services
         private async Task<List<SystemData>> GetAllSearchResults(string searchReference)
         {
             var systems = new List<SystemData>();
-            var semaphore = new SemaphoreSlim(50); // Limit concurrent scoring tasks
+            int page = 0;
             bool hasMoreResults = true;
 
             while (hasMoreResults)
@@ -193,61 +145,40 @@ namespace EDPA.Services
                         ? $"https://spansh.co.uk/api/systems/search/recall/{searchReference}"
                         : $"https://spansh.co.uk/api/systems/search/recall/{searchReference}/{page}";
 
-                    using var response = await _httpClient.GetAsync(url);
+                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                    var response = await _httpClient.SendAsync(request);
                     response.EnsureSuccessStatusCode();
 
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    using var doc = JsonDocument.Parse(responseBody);
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(responseBody);
                     var root = doc.RootElement;
 
                     if (!root.TryGetProperty("results", out var resultsElement) ||
-                        resultsElement.ValueKind != JsonValueKind.Array)
+                        resultsElement.ValueKind != JsonValueKind.Array ||
+                        !resultsElement.EnumerateArray().Any())
                     {
                         break;
                     }
 
-                    // Parse systems in parallel
-                    var systemsArray = resultsElement.EnumerateArray().ToArray();
-                    var pageSystems = new ConcurrentBag<SystemData>();
-                    var scoringTasks = new List<Task>();
-
-                    foreach (var system in systemsArray)
+                    var pageSystems = new List<SystemData>();
+                    foreach (var system in resultsElement.EnumerateArray())
                     {
-                        if (system.TryGetProperty("name", out var name) && name.GetString() == "Test")
-                            continue;
-
-                        await semaphore.WaitAsync();
-                        scoringTasks.Add(Task.Run(async () =>
+                        var systemData = ParseSystemDataOptimized(system);
+                        if (systemData != null && systemData.Name != "Test")
                         {
-                            try
-                            {
-                                var systemData = ParseSystemData(system);
-                                if (systemData != null)
-                                {
-                                    var scoreResult = await _piracyScoringService.CalculateSystemScore(systemData: systemData);
-                                    systemData.SystemScore = new List<PiracyScoreResult> { scoreResult };
-                                    pageSystems.Add(systemData);
-                                }
-                            }
-                            finally
-                            {
-                                semaphore.Release();
-                            }
-                        }));
+                            pageSystems.Add(systemData);
+                        }
                     }
 
-                    await Task.WhenAll(scoringTasks);
                     systems.AddRange(pageSystems);
 
-                    // Check if last page
-                    if (systemsArray.Length < MaxPageSize)
+                    if (pageSystems.Count < MaxPageSize)
                     {
                         hasMoreResults = false;
                     }
                     else
                     {
                         page++;
-                        await Task.Delay(100); // Reduced delay
                     }
                 }
                 catch (Exception ex)
@@ -257,166 +188,91 @@ namespace EDPA.Services
                 }
             }
 
+            Console.WriteLine($"Retrieved {systems.Count} systems total");
             return systems;
         }
 
-        private SystemData ParseSystemData(JsonElement systemElement)
+
+        private SystemData ParseSystemDataOptimized(JsonElement systemElement)
         {
             var systemData = new SystemData();
 
-            // Basic system info
+            // Parse only essential properties
             if (systemElement.TryGetProperty("name", out var nameElement))
-            {
-                systemData.Name = nameElement.GetString();
-            }
+                systemData.Name = nameElement.GetString() ?? string.Empty;
 
-            if (systemElement.TryGetProperty("security", out var securityElement))
-            {
-                systemData.Security = securityElement.GetString();
-            }
+            systemData.Security = GetStringProperty(systemElement, "security");
+            systemData.Population = GetInt64Property(systemElement, "population", 0);
+            systemData.Economy = GetStringProperty(systemElement, "primary_economy");
+            systemData.SecondEconomy = GetStringProperty(systemElement, "secondary_economy");
+            systemData.Government = GetStringProperty(systemElement, "government");
+            systemData.FactionState = GetStringProperty(systemElement, "controlling_minor_faction_state");
 
-            if (systemElement.TryGetProperty("population", out var populationElement))
-            {
-                systemData.Population = populationElement.GetInt64();
-            }
+            // Parse stations (needed for market data) - with carrier filtering
+            if (systemElement.TryGetProperty("stations", out var stationsElement))
+                ParseStationsOptimized(systemData, stationsElement);
 
-            if (systemElement.TryGetProperty("primary_economy", out var primaryEconomyElement))
-            {
-                systemData.Economy = primaryEconomyElement.GetString();
-            }
-
-            if (systemElement.TryGetProperty("secondary_economy", out var secondaryEconomyElement))
-            {
-                systemData.SecondEconomy = secondaryEconomyElement.GetString();
-            }
-
-            if (systemElement.TryGetProperty("government", out var governmentElement))
-            {
-                systemData.Government = governmentElement.GetString();
-            }
-
-            if (systemElement.TryGetProperty("controlling_minor_faction_state", out var factionStateElement))
-            {
-                systemData.FactionState = factionStateElement.GetString();
-            }
-
-            // Parse bodies and check for rings
-            if (systemElement.TryGetProperty("bodies", out var bodiesElement) && bodiesElement.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var body in bodiesElement.EnumerateArray())
-                {
-                    var planet = new Planet();
-
-                    if (body.TryGetProperty("name", out var bodyNameElement))
-                    {
-                        planet.Name = bodyNameElement.GetString();
-                    }
-
-                    if (body.TryGetProperty("type", out var bodyTypeElement))
-                    {
-                        planet.Type = bodyTypeElement.GetString();
-                    }
-
-                    if (body.TryGetProperty("distance_to_arrival", out var distanceElement))
-                    {
-                        planet.DistanceFromArrivalLS = distanceElement.GetDouble();
-                    }
-
-                    // Check for rings and add them to the system
-                    if (body.TryGetProperty("rings", out var ringsElement) && ringsElement.ValueKind == JsonValueKind.Array)
-                    {
-                        planet.HasRings = true;
-
-                        foreach (var ring in ringsElement.EnumerateArray())
-                        {
-                            var systemRing = new Ring();
-
-                            if (ring.TryGetProperty("name", out var ringNameElement))
-                            {
-                                systemRing.Type = ringNameElement.GetString();
-                            }
-
-                            if (ring.TryGetProperty("type", out var ringTypeElement))
-                            {
-                                systemRing.Composition = ringTypeElement.GetString();
-                            }
-
-                            if (body.TryGetProperty("distance_to_arrival", out var ringDistanceElement))
-                            {
-                                systemRing.DistanceFromSystemEntry = ringDistanceElement.GetDouble();
-                            }
-
-                            systemData.Rings.Add(systemRing);
-                        }
-                    }
-
-                    systemData.Planets.Add(planet);
-                }
-            }
-
-            // Parse stations and their market IDs
-            if (systemElement.TryGetProperty("stations", out var stationsElement) && stationsElement.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var station in stationsElement.EnumerateArray())
-                {
-                    var systemStation = new Station();
-
-                    if (station.TryGetProperty("name", out var stationNameElement))
-                    {
-                        systemStation.Name = stationNameElement.GetString();
-                    }
-
-                    if (station.TryGetProperty("type", out var stationTypeElement))
-                    {
-                        systemStation.Type = stationTypeElement.GetString();
-                    }
-
-                    if (station.TryGetProperty("distance_to_arrival", out var stationDistanceElement))
-                    {
-                        systemStation.DistanceToArrival = stationDistanceElement.GetDouble();
-                    }
-
-                    if (station.TryGetProperty("has_market", out var hasMarketElement))
-                    {
-                        systemStation.HaveMarket = hasMarketElement.GetBoolean();
-                    }
-
-                    if (station.TryGetProperty("market_id", out var marketIdElement))
-                    {
-                        systemStation.MarketId = marketIdElement.GetInt64();
-                    }
-
-                    systemData.Stations.Add(systemStation);
-                }
-            }
-
-            if (systemElement.TryGetProperty("minor_faction_presences", out var minorFactionPresenceElement) && minorFactionPresenceElement.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var faction in minorFactionPresenceElement.EnumerateArray())
-                {
-
-                    var minorFaction = new MinorFactionPresences();
-
-                    if (faction.TryGetProperty("name", out var minorFactionNameElement))
-                    {
-                        minorFaction.Name = minorFactionNameElement.GetString();
-                    }
-
-                    if (faction.TryGetProperty("state", out var minorFactionStateElement))
-                    {
-                        minorFaction.State = minorFactionStateElement.GetString();
-                    }
-
-                    if (faction.TryGetProperty("influence", out var minorFactionInfluenceElement))
-                    {
-                        minorFaction.Influence = minorFactionInfluenceElement.GetDouble();
-                    }
-
-                    systemData.MinorFactionPresences.Add(minorFaction);
-                }
-            }
+            // Parse factions (needed for pirate faction check)
+            if (systemElement.TryGetProperty("minor_faction_presences", out var factionsElement))
+                ParseFactionsOptimized(systemData, factionsElement);
 
             return systemData;
         }
+
+        private void ParseFactionsOptimized(SystemData systemData, JsonElement factionsElement)
+        {
+            foreach (var faction in factionsElement.EnumerateArray())
+            {
+                if (faction.TryGetProperty("name", out var nameElement) && nameElement.ValueKind == JsonValueKind.String)
+                {
+                    var factionName = nameElement.GetString();
+                    systemData.MinorFactionPresences.Add(new MinorFactionPresences { Name = factionName });
+                }
+            }
+        }
+
+        private void ParseStationsOptimized(SystemData systemData, JsonElement stationsElement)
+        {
+            foreach (var station in stationsElement.EnumerateArray())
+            {
+                // Skip carrier stations - only if type exists and contains "Carrier"
+                if (station.TryGetProperty("type", out var stationTypeElement) &&
+                    stationTypeElement.ValueKind == JsonValueKind.String)
+                {
+                    var stationType = stationTypeElement.GetString();
+                    if (stationType?.Contains("Carrier") == true)
+                        continue;
+                }
+
+                var systemStation = new Station
+                {
+                    Name = station.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : string.Empty,
+                    Type = station.TryGetProperty("type", out var typeElement) ? typeElement.GetString() : string.Empty,
+                    HaveMarket = station.TryGetProperty("has_market", out var marketElement) && marketElement.GetBoolean(),
+                    MarketId = station.TryGetProperty("market_id", out var marketIdElement) ? marketIdElement.GetInt64() : 0,
+                    DistanceToArrival = station.TryGetProperty("distance_to_arrival", out var distanceElement)
+                        ? distanceElement.GetDouble()
+                        : 0
+                };
+
+                systemData.Stations.Add(systemStation);
+            }
+        }
+
+        // Helper methods for faster property access
+        private string GetStringProperty(JsonElement element, string propertyName)
+        {
+            return element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String
+                ? prop.GetString() ?? string.Empty
+                : string.Empty;
+        }
+
+        private long GetInt64Property(JsonElement element, string propertyName, long defaultValue)
+        {
+            return element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.Number
+                ? prop.GetInt64()
+                : defaultValue;
+        }
+
     }
 }

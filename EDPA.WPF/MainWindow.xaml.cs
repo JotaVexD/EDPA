@@ -24,7 +24,6 @@ public partial class MainWindow
         Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
 
         // Initialize silent cache management
-        InitializeCacheManagement();
 
         InitializeComponent();
 
@@ -100,24 +99,6 @@ public partial class MainWindow
             catch (Exception ex)
             {
                 Console.WriteLine($"API configuration change error: {ex.Message}");
-            }
-        });
-    }
-
-    private void InitializeCacheManagement()
-    {
-        // Automatically clear expired cache on startup
-        Task.Run(() =>
-        {
-            try
-            {
-                var cacheService = new CacheService(TimeSpan.FromHours(24));
-                cacheService.ClearExpiredCache();
-                Console.WriteLine("Expired cache cleared automatically");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Automatic cache cleanup failed: {ex.Message}");
             }
         });
     }

@@ -29,7 +29,7 @@ namespace EDPA.WPF.ViewModels
         public string GovernmentDescription => _systemData.Government; 
         public string PopulationDescription => $"{_systemData.Population:n0}";
         public string NoRingsDescription => "No rings present";
-        public string SecurityDescription => _systemData.Government;
+        public string SecurityDescription => _systemData.Security;
         public string FactionStateDescription => _systemData.FactionState;
         public string MarketDemandDescription
         {
@@ -67,7 +67,6 @@ namespace EDPA.WPF.ViewModels
             var factors = new List<string>();
 
             if (_scoreResult.HasIndustrialEconomy || _scoreResult.HasExtractionEconomy) factors.Add("\n\t- Favorable economy");
-            if (_scoreResult.HasNoRings) factors.Add("\n\t- Lack of rings");
             if (_scoreResult.HasAnarchyGovernment) factors.Add("\n\t- Anarchic government");
             if (_scoreResult.HasLowSecurity) factors.Add("\n\t- Low security presence");
             if (_scoreResult.MarketDemandScore > 0.05 && _scoreResult.BestCommodity != null) factors.Add($"\n\t- High market demand of {_scoreResult.BestCommodity.Name}");
@@ -80,7 +79,6 @@ namespace EDPA.WPF.ViewModels
             var factors = new List<string>();
 
             if (!_scoreResult.HasIndustrialEconomy && !_scoreResult.HasExtractionEconomy) factors.Add("\n\t- Unfavorable economy");
-            if (!_scoreResult.HasNoRings) factors.Add("\n\t- Presence of rings");
             if (!_scoreResult.HasAnarchyGovernment) factors.Add("\n\t- Strong government presence");
             if (!_scoreResult.HasLowSecurity) factors.Add("\n\t- High security");
             if (_scoreResult.MarketDemandScore < 0.02) factors.Add("\n\t- Bad markets demand");
@@ -94,7 +92,6 @@ namespace EDPA.WPF.ViewModels
             var improvements = new List<string>();
 
             if (!_scoreResult.HasIndustrialEconomy && !_scoreResult.HasExtractionEconomy) improvements.Add("\n\t- Look for industrial/extraction economies");
-            if (!_scoreResult.HasNoRings) improvements.Add("\n\t- Prioritize systems without rings");
             if (!_scoreResult.HasAnarchyGovernment) improvements.Add("\n\t- Seek anarchic systems");
             if (!_scoreResult.HasLowSecurity) improvements.Add("\n\t- Target low security systems");
             if (_scoreResult.MarketDemandScore < 0.02) improvements.Add("\n\t- Look for high demand markets");

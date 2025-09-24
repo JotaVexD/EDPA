@@ -17,7 +17,7 @@ namespace EDPA.WPF.ViewModels
                     title: title,
                     message: message,
                     appearance: appearance,
-                    timeout: TimeSpan.FromSeconds(4)
+                    timeout: TimeSpan.FromSeconds(10)
                 );
             }
         }

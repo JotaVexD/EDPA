@@ -9,12 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -30,6 +32,7 @@ namespace EDPA.WPF.Views.Pages
         private PiracyScoringService _scoringService;
         private EDSMService _edsmService;
         private SpanshSystemSearch _spanshSearcher;
+        private CacheService _cacheService;
         private List<SystemData> _systemsData;
         private ICollectionView _resultsView;
         private List<PiracyScoreResult> _currentResults = new List<PiracyScoreResult>();
@@ -42,6 +45,7 @@ namespace EDPA.WPF.Views.Pages
         public SearchSystem()
         {
             InitializeComponent();
+
             _instance = this;
             Loaded += OnPageLoaded;
         }
@@ -75,6 +79,7 @@ namespace EDPA.WPF.Views.Pages
 
         private void UpdateUIState()
         {
+            ResultsListView.SelectedItem = null;
             // Update button states based on current results
             ExportButton.IsEnabled = ApplicationStateService.Instance.SearchResults.Count > 0;
             ClearResultsButton.IsEnabled = ApplicationStateService.Instance.SearchResults.Count > 0;
@@ -82,14 +87,6 @@ namespace EDPA.WPF.Views.Pages
             // Update status label
             if (ApplicationStateService.Instance.SearchResults.Count > 0)
             {
-                // Load previous state
-                ReferenceSystemTextBox.Text = ApplicationStateService.Instance.ReferenceSystem;
-                MaxDistanceSlider.Value = ApplicationStateService.Instance.MaxDistance;
-                _systemsData = ApplicationStateService.Instance.systemData;
-
-                ResultsListView.SelectedItem = null;
-                ResultsListView.ItemsSource = _resultsView;
-
                 var bestSystem = ApplicationStateService.Instance.SearchResults.OrderByDescending(r => r.FinalScore).First();
                 StatusLabel.Text = $"Found {ApplicationStateService.Instance.SearchResults.Count} results. Best system: {bestSystem.SystemName} ({bestSystem.FinalScore:F2}/100)";
             }
@@ -112,28 +109,29 @@ namespace EDPA.WPF.Views.Pages
                 // Initialize the Services WPF
                 ScoringWeightsProvider.Initialize(configuration);
 
-                // Set up dependency injection with caching
+                // Set up dependency injection - simplified without memory cache
                 var serviceProvider = new ServiceCollection()
                     .AddSingleton<IConfiguration>(configuration)
                     .AddSingleton<HttpClient>()
-                    .AddSingleton<CacheService>(new CacheService(TimeSpan.FromHours(24)))
-                    .AddMemoryCache()
                     .AddSingleton<IApiKeyProvider>(ApplicationStateService.Instance)
-                    .AddSingleton<EDSMService>()
+                    .AddSingleton<EDSMService>() // Now only needs HttpClient, IConfiguration, IApiKeyProvider
                     .AddSingleton<SpanshSystemSearch>()
                     .AddSingleton<PiracyScoringService>()
+                    .AddSingleton<CacheService>(new CacheService(TimeSpan.FromHours(24)))
                     .BuildServiceProvider();
 
                 // Get the services
                 _edsmService = serviceProvider.GetService<EDSMService>();
                 _spanshSearcher = serviceProvider.GetService<SpanshSystemSearch>();
                 _scoringService = serviceProvider.GetService<PiracyScoringService>();
+                _cacheService = serviceProvider.GetService<CacheService>();
             }
             catch (Exception ex)
             {
                 await ShowUiMessageAsync("Initialization Error", $"Failed to initialize services: {ex.Message}", "OK");
             }
         }
+
 
         private async Task<MessageBoxResult> ShowUiMessageAsync(
             string title,
@@ -161,7 +159,6 @@ namespace EDPA.WPF.Views.Pages
                 uiMessage.IsCloseButtonEnabled = true;
             }
 
-            // Show as dialog and wait for result (Primary / Secondary / None)
             return await uiMessage.ShowDialogAsync();
         }
 
@@ -174,39 +171,45 @@ namespace EDPA.WPF.Views.Pages
                 _isAnalyzing = true;
                 SetUiEnabled(false);
 
-                // Save search parameters
-                ApplicationStateService.Instance.ReferenceSystem = ReferenceSystemTextBox.Text;
+                string referenceSystem = ReferenceSystemTextBox.Text;
                 int maxDistance = (int)MaxDistanceSlider.Value;
-                ApplicationStateService.Instance.MaxDistance = maxDistance;
 
-                // Clear previous results
+                ApplicationStateService.Instance.ReferenceSystem = referenceSystem;
+                ApplicationStateService.Instance.MaxDistance = maxDistance;
                 ApplicationStateService.Instance.SearchResults.Clear();
 
-                // Get reference system and distance
-                string referenceSystem = ReferenceSystemTextBox.Text;
                 if (string.IsNullOrEmpty(referenceSystem))
                 {
                     SnackbarHelper.ShowError("Please enter a reference system.");
-                    await Task.Delay(100);
                     return;
                 }
 
-                // No need to parse since we're using a slider with fixed range
                 StatusLabel.Text = $"Searching for systems near {referenceSystem} (within {maxDistance} ly)...";
 
-                // Use the SpanshSystemSearch class to get complete system data
-                var systems = await _spanshSearcher.SearchSystemsNearReference(referenceSystem, maxDistance,_scoringService);
+                // Single cache key for fully scored results
+                var cacheKey = $"Search_{referenceSystem}_{maxDistance}";
 
-                StatusLabel.Text = $"Found {systems.Count} systems near {referenceSystem} (within {maxDistance} ly). Analyzing...";
+                // Use GetOrCreateAsync - much cleaner!
+                var scoredSystems = await _cacheService.GetOrCreateAsync(
+                    cacheKey,
+                    async () => await FetchAndScoreSystems(referenceSystem, maxDistance),
+                    TimeSpan.FromHours(24)
+                );
 
-                // Analyze the systems using the SystemData objects we already have
-                await AnalyzeSystems(systems);
+                if (scoredSystems != null && scoredSystems.Count > 0)
+                {
+                    await DisplayScoredSystems(scoredSystems);
+                    SnackbarHelper.ShowSuccess($"Found {scoredSystems.Count} systems.");
+                }
+                else
+                {
+                    SnackbarHelper.ShowError("No systems found or analysis failed.");
+                }
             }
             catch (Exception ex)
             {
                 await ShowUiMessageAsync("Search Error", $"Error searching for systems: {ex.Message}", "OK");
                 SnackbarHelper.ShowError("Search failed.");
-                //StatusLabel.Text = "Search failed.";
             }
             finally
             {
@@ -215,58 +218,108 @@ namespace EDPA.WPF.Views.Pages
             }
         }
 
-
-        private async Task AnalyzeSystems(List<SystemData> systemsData)
+        private async Task<List<SystemData>> FetchAndScoreSystems(string referenceSystem, int maxDistance)
         {
-            if (systemsData == null || systemsData.Count == 0)
-            {
-                FlyoutWarning.IsOpen = true;
-                SetUiEnabled(false);
-                return;
-            }
-
-            // Store the original cache key
-            string referenceSystem = ReferenceSystemTextBox.Text;
-            int maxDistance = (int)MaxDistanceSlider.Value;
-            var cacheKey = $"Search_{referenceSystem}_{maxDistance}";
+            ProgressBar.Visibility = Visibility.Visible;
+            ProgressBar.Value = 0;
 
             try
             {
+                // Step 1: Fetch raw data from Spansh
+                StatusLabel.Text = $"Fetching systems from Spansh...";
+                var rawSystems = await _spanshSearcher.SearchSystemsNearReference(referenceSystem, maxDistance);
 
-                foreach (var system in systemsData)
+                if (rawSystems == null || rawSystems.Count == 0)
                 {
-                    ApplicationStateService.Instance.SearchResults.AddRange(system.SystemScore);
-                    _resultsView.Refresh();
+                    return new List<SystemData>();
                 }
 
+                // Step 2: Score all systems with progress tracking
+                StatusLabel.Text = $"Scoring {rawSystems.Count} systems...";
+                ProgressBar.Maximum = rawSystems.Count;
+
+                var scoredSystems = await ScoreSystemsInParallel(rawSystems);
+                return scoredSystems;
             }
-            catch (Exception ex)
+            finally
             {
-                await Dispatcher.InvokeAsync(async () =>
-                {
-                    await ShowUiMessageAsync("Analysis Error", $"Error during analysis: {ex.Message}", "OK");
-                });
+                ProgressBar.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async Task<List<SystemData>> ScoreSystemsInParallel(List<SystemData> systems)
+        {
+            // Batch processing for better memory usage
+            const int batchSize = 100;
+            var results = new List<SystemData>();
+
+            for (int i = 0; i < systems.Count; i += batchSize)
+            {
+                var batch = systems.Skip(i).Take(batchSize).ToList();
+                var batchResults = await ProcessBatch(batch, i, systems.Count);
+                results.AddRange(batchResults);
+
+                // Force GC after each batch to manage memory
+                GC.Collect(2, GCCollectionMode.Optimized, false, true);
             }
 
-            
 
+            return results;
+        }
+
+        private async Task<List<SystemData>> ProcessBatch(List<SystemData> batch, int startIndex, int totalCount)
+        {
+            var semaphore = new SemaphoreSlim(Environment.ProcessorCount);
+            var batchResults = new SystemData[batch.Count];
+            var tasks = new List<Task>();
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                var index = i;
+                var system = batch[index];
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        var scoreResult = await _scoringService.CalculateSystemScore(systemData: system);
+                        system.SystemScore.Add(scoreResult);
+                        batchResults[index] = system;
+
+                        // Update progress less frequently for better performance
+                        if (index % 10 == 0) // Update every 10 systems instead of each one
+                        {
+                            await Dispatcher.InvokeAsync(() =>
+                            {
+                                ProgressBar.Value = startIndex + index + 1;
+                                StatusLabel.Text = $"Scoring... ({startIndex + index + 1}/{totalCount})";
+                            });
+                        }
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+            return batchResults.Where(s => s != null).ToList();
+        }
+
+        private async Task DisplayScoredSystems(List<SystemData> scoredSystems)
+        {
             await Dispatcher.InvokeAsync(() =>
             {
-                _systemsData = systemsData;
-                ApplicationStateService.Instance.systemData = systemsData;
-
-                if (ApplicationStateService.Instance.SearchResults.Count == 0)
+                foreach (var system in scoredSystems)
                 {
-                    FlyoutWarning.IsOpen = true;
-                    SetUiEnabled(false);
-                }
-                else
-                {
-                    SnackbarHelper.ShowInfo($"Analysis complete. Found {ApplicationStateService.Instance.SearchResults.Count} results.");
+                    ApplicationStateService.Instance.SearchResults.AddRange(system.SystemScore);
                 }
 
-                ProgressBar.Visibility = Visibility.Collapsed;
-                //_resultsView.Refresh();
+                _systemsData = scoredSystems;
+                ApplicationStateService.Instance.systemData = scoredSystems;
+                _resultsView.Refresh();
                 UpdateUIState();
             });
         }
@@ -290,44 +343,34 @@ namespace EDPA.WPF.Views.Pages
         {
             ApplicationStateService.Instance.SearchResults.Clear();
             ApplicationStateService.Instance.systemData.Clear();
+            _resultsView.Refresh();
 
             SnackbarHelper.ShowInfo("Results cleared. Ready to search.");
-
-            // Update UI state
             UpdateUIState();
         }
 
         private void ResultsDataGridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_isAnalyzing)
+            if (!_isAnalyzing && ResultsListView.SelectedItem is PiracyScoreResult selectedResult && selectedResult != null)
             {
-                if (ResultsListView.SelectedItem is PiracyScoreResult selectedResult && selectedResult != null)
+                ApplicationStateService.Instance.ReferenceSystem = ReferenceSystemTextBox.Text;
+                ApplicationStateService.Instance.MaxDistance = (int)MaxDistanceSlider.Value;
+                ApplicationStateService.Instance.systemData = _systemsData;
+
+                var sendSystem = _systemsData.Find(s => s.Name == selectedResult.SystemName);
+                if (sendSystem != null)
                 {
-                    // Save current state before navigating away
-                    ApplicationStateService.Instance.ReferenceSystem = ReferenceSystemTextBox.Text;
-                    ApplicationStateService.Instance.MaxDistance = (int)MaxDistanceSlider.Value;
-                    ApplicationStateService.Instance.systemData = _systemsData;
+                    Application.Current.Properties["PreviousPageContent"] = this;
+                    var systemDetailsPage = new SystemDetailsPage(selectedResult, sendSystem);
 
-                    // Find the corresponding system data
-                    SystemData sendSystem = _systemsData.Find(s => s.Name == selectedResult.SystemName);
-
-                    if (sendSystem != null)
+                    if (NavigationService != null)
                     {
-                        Application.Current.Properties["PreviousPageContent"] = this;
-                        // Navigate to the system details page
-                        var systemDetailsPage = new SystemDetailsPage(selectedResult, sendSystem);
-
-                        // Use the navigation service if available
-                        if (NavigationService != null)
-                        {
-                            NavigationService.Navigate(systemDetailsPage);
-                        }
-                        else
-                        {
-                            // Fallback: try to find a parent frame
-                            var parentFrame = FindParentFrame(this);
-                            parentFrame?.Navigate(systemDetailsPage);
-                        }
+                        NavigationService.Navigate(systemDetailsPage);
+                    }
+                    else
+                    {
+                        var parentFrame = FindParentFrame(this);
+                        parentFrame?.Navigate(systemDetailsPage);
                     }
                 }
             }
@@ -336,12 +379,10 @@ namespace EDPA.WPF.Views.Pages
         private Frame FindParentFrame(DependencyObject child)
         {
             DependencyObject parent = VisualTreeHelper.GetParent(child);
-
             while (parent != null && !(parent is Frame))
             {
                 parent = VisualTreeHelper.GetParent(parent);
             }
-
             return parent as Frame;
         }
 
@@ -353,7 +394,6 @@ namespace EDPA.WPF.Views.Pages
                 return;
             }
 
-            // Implement export functionality
             var saveDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "CSV Files (*.csv)|*.csv|Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
@@ -365,18 +405,14 @@ namespace EDPA.WPF.Views.Pages
             {
                 try
                 {
-                    using (var writer = new System.IO.StreamWriter(saveDialog.FileName))
+                    using (var writer = new StreamWriter(saveDialog.FileName))
                     {
-                        // Write header
                         writer.WriteLine("System,Score,Economy,No Rings,Government,Security,Faction State,Market Demand");
-
-                        // Write data
                         foreach (var result in ApplicationStateService.Instance.SearchResults.OrderByDescending(r => r.FinalScore))
                         {
                             writer.WriteLine($"\"{result.SystemName}\",{result.FinalScore:F2},{result.EconomyScore:F2},{result.NoRingsScore:F2},{result.GovernmentScore:F2},{result.SecurityScore:F2},{result.FactionStateScore:F2},{result.MarketDemandScore:F2}");
                         }
                     }
-
                     await ShowUiMessageAsync("Export Successful", $"Results exported to {saveDialog.FileName}", "OK");
                 }
                 catch (Exception ex)
@@ -384,19 +420,6 @@ namespace EDPA.WPF.Views.Pages
                     await ShowUiMessageAsync("Export Error", $"Error exporting results: {ex.Message}", "OK");
                 }
             }
-        }
-
-        public class AnalysisProgress
-        {
-            public int Current { get; set; }
-            public int Total { get; set; }
-            public string SystemName { get; set; }
-            public PiracyScoreResult Result { get; set; }
-        }
-
-        public void RefreshUI()
-        {
-            UpdateUIState();
         }
     }
 }
