@@ -68,7 +68,9 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 
 - Go to [Latest Releases](https://github.com/JotaVexD/EDPA/releases/latest)
 - Download the last EDPA.exe
-- **Use!**
+- Open the App and go to [EDSM](https://www.edsm.net/en/settings/api)
+- Get your API and Save on the **Settings**
+- **Use**
 - Any problem or feedack open a [Issue](https://github.com/JotaVexD/EDPA/issues)
 
 ## Disclaimer
