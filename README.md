@@ -62,7 +62,14 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 - **Cache Management:** Automatic cache cleanup with manual control options
 
 ### First-Time Setup
-- TODO
+> [!WARNING]
+> **Many thinks are still beyond my control**
+> - Memory management is something I haven't considered yet.
+
+- Go to [Latest Releases](https://github.com/JotaVexD/EDPA/releases/latest)
+- Download the last EDPA.exe
+- **Use!**
+- Any problem or feedack open a [Issue](https://github.com/JotaVexD/EDPA/issues)
 
 ## Disclaimer
 This tool is designed for PvE (Player vs Environment) piracy only. I do not condone harassment of other players or exploitation of game mechanics. Always follow Frontier Developments' terms of service and the Elite Dangerous community guidelines.
