@@ -337,6 +337,11 @@ namespace EDPA.WPF.Views.Pages
             ReferenceSystemTextBox.IsEnabled = enabled;
             MaxDistanceSlider.IsEnabled = enabled;
             ClearResultsButton.IsEnabled = enabled && ApplicationStateService.Instance.SearchResults.Count > 0;
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.OnIsAnalyzing(enabled);
+            }
         }
 
         private void ClearResultsButton_Click(object sender, RoutedEventArgs e)

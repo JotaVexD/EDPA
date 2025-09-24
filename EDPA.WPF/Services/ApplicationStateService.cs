@@ -17,7 +17,6 @@ namespace EDPA.WPF.Services
 
         public static ApplicationStateService Instance => _instance ??= new ApplicationStateService();
 
-        // API Configuration properties
         private bool _isApiConfigured;
         public bool IsApiConfigured
         {
@@ -38,6 +37,7 @@ namespace EDPA.WPF.Services
         bool IApiKeyProvider.IsApiConfigured => IsApiConfigured;
 
         public event EventHandler<bool> ApiConfigurationChanged;
+        public event EventHandler<bool> IsAnalyzing;
         public event PropertyChangedEventHandler PropertyChanged;
 
         // Search-related properties (not persisted)

@@ -88,6 +88,7 @@ public partial class MainWindow
                     DashboardPage.Visibility = Visibility.Visible;
                     SavedSystems.Visibility = Visibility.Visible;
                     SearchSystem.Visibility = Visibility.Visible;
+                    _appState.ApiConfigurationChanged -= OnApiConfigurationChanged;
                 }
                 else if (!isConfigured)
                 {
@@ -101,6 +102,15 @@ public partial class MainWindow
                 Console.WriteLine($"API configuration change error: {ex.Message}");
             }
         });
+    }
+
+    public void OnIsAnalyzing(bool isAnalyzing)
+    {
+
+        DashboardPage.IsEnabled = isAnalyzing;
+        SavedSystems.IsEnabled = isAnalyzing;
+        SearchSystem.IsEnabled = isAnalyzing;
+
     }
 
     protected override void OnClosed(EventArgs e)
