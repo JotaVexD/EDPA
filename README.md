@@ -32,7 +32,6 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 - **Population demographics**
 - **Faction states** (Boom, Civil Unrest, War, etc.)
 - **Market demand** for valuable commodities
-- **Presence of planetary rings**
 
 ## Features
 
@@ -42,6 +41,7 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 - **Weighted Scoring System** - Configurable weights for different economic and political factors
 
 ### Planed Features
+- **Presence of planetary rings**
 - **Additional data sources** (Inara, EDDB integration)
 - **More sophisticated scoring algorithms**
 - **Route planning for multiple targets**
