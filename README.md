@@ -83,8 +83,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 <details>
   <summary>Software Screenshots</summary>
   
-  ![Exemple Search](https://github.com/user-attachments/assets/54ef5079-075a-466d-8387-68947133e760)
-  ![Exemple System Details](https://github.com/user-attachments/assets/23b7e4a3-efdd-4b9f-9125-5bda55169394)
-  ![Exemple Saved Systems](https://github.com/user-attachments/assets/b4adeb99-19a8-4fa3-9774-eb9783c7b668)
+  ![Exemple Search](https://github.com/user-attachments/assets/2d9fb43c-8405-4fb7-af43-aa75a7d49a85)
+  ![Exemple System Details](https://github.com/user-attachments/assets/76535df5-8178-4dbe-b1c8-53fa4b1e11df)
+  ![Exemple Saved Systems](https://github.com/user-attachments/assets/7d97c508-21a4-4941-aa3b-ea1c46d8ad89)
+  ![Exemple Spansh](https://github.com/user-attachments/assets/21735c13-3a39-4a61-9011-8f170bd8aff0)
   
 </details>
