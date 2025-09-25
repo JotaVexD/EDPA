@@ -32,7 +32,6 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 - **Population demographics**
 - **Faction states** (Boom, Civil Unrest, War, etc.)
 - **Market demand** for valuable commodities
-- **Presence of planetary rings**
 
 ## Features
 
@@ -42,6 +41,7 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 - **Weighted Scoring System** - Configurable weights for different economic and political factors
 
 ### Planed Features
+- **Presence of planetary rings**
 - **Additional data sources** (Inara, EDDB integration)
 - **More sophisticated scoring algorithms**
 - **Route planning for multiple targets**
@@ -62,7 +62,16 @@ EDPA is designed to assist Commanders engaged in PvE piracy by analyzing systems
 - **Cache Management:** Automatic cache cleanup with manual control options
 
 ### First-Time Setup
-- TODO
+> [!WARNING]
+> **Many thinks are still beyond my control**
+> - Memory management is something I haven't considered yet.
+
+- Go to [Latest Releases](https://github.com/JotaVexD/EDPA/releases/latest)
+- Download the last EDPA.exe
+- Open the App and go to [EDSM](https://www.edsm.net/en/settings/api)
+- Get your API and Save on the **Settings**
+- **Use**
+- Any problem or feedack open a [Issue](https://github.com/JotaVexD/EDPA/issues)
 
 ## Disclaimer
 This tool is designed for PvE (Player vs Environment) piracy only. I do not condone harassment of other players or exploitation of game mechanics. Always follow Frontier Developments' terms of service and the Elite Dangerous community guidelines.
