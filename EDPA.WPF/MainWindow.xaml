@@ -34,11 +34,18 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-
+        <Image Source="/Assets/EDPALogoCroped.png" 
+               Grid.Row="0" 
+               MaxHeight="20" 
+               MaxWidth="20" 
+               HorizontalAlignment="Left"
+               VerticalAlignment="Center"
+               Margin="15,0,0,0"/>
         <ui:TitleBar
             Title="EDPA - Elite Dangerous Piracy Analytics"
             Grid.Row="0"
-            Icon="pack://application:,,,/Assets/applicationIcon-256.png" Margin="-10,5,10,0" Height="38" />
+            Margin="10,0,0,0"
+            VerticalAlignment="Center"/>
 
 
         <ui:NavigationView x:Name="MainFrame" Grid.Row="1" PaneDisplayMode="LeftFluent">
@@ -51,7 +58,7 @@
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem
                     x:Name="DashboardPage"
-                    Content="Dashboard"
+                    Content="Home"
                     NavigationCacheMode="Enabled"
                     TargetPageType="{x:Type pages:DashboardPage}">
                     <ui:NavigationViewItem.Icon>
@@ -60,7 +67,7 @@
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem
                     x:Name="SavedSystems"
-                    Content="Data"
+                    Content="Saved"
                     NavigationCacheMode="Enabled"
                     TargetPageType="{x:Type pages:SavedSystems}">
                     <ui:NavigationViewItem.Icon>
@@ -69,7 +76,7 @@
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem
                     x:Name="SearchSystem"
-                    Content="Data"
+                    Content="Search"
                     NavigationCacheMode="Enabled"
                     TargetPageType="{x:Type pages:SearchSystem}">
                     <ui:NavigationViewItem.Icon>
