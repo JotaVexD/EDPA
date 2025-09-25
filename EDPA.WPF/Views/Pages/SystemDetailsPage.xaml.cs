@@ -150,5 +150,25 @@ namespace EDPA.WPF.Views.Pages
                 }));
             }
         }
+
+        private void ViewInInaraButton_Click(object sender, RoutedEventArgs e)
+        {
+            var systemName = _systemData.Name;
+            var inaraPage = new WebView(systemName,_systemData.Id);
+            Application.Current.Properties["BackToDetails"] = this;
+
+            // Use your existing navigation method
+            if (NavigationService != null)
+            {
+                NavigationService.Navigate(inaraPage);
+            }
+        }
+
+        //Clipboard.SetText(txtClipboard.Text);
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(_systemData.Name);
+            SnackbarHelper.ShowInfo($"{_scoreResult.SystemName} copied to the clipboard!");
+        }
     }
 }

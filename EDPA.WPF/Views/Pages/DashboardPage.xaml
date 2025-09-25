@@ -1,11 +1,54 @@
-<Page x:Class="EDPA.WPF.Views.Pages.DashboardPage"
+﻿<Page x:Class="EDPA.WPF.Views.Pages.DashboardPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Dashboard">
-    <Grid>
-        <TextBlock Text="Dashboard Content" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   FontSize="24"/>
-    </Grid>
+      Title="EDPA Dashboard"
+      Background="{DynamicResource ApplicationBackgroundBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="40">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="800">
+
+            <!-- Logo and Main Title -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,30">
+                <Image Height="80" Source="/Assets/EDPALogoCroped.png" Margin="0,0,20,0"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="EDPA" FontSize="36" FontWeight="Black" Foreground="#8B2E31"/>
+                    <!-- Gold color -->
+                    <TextBlock Text="Elite Dangerous Piracy Assistant" FontSize="18" Foreground="#FF94A3B8" Margin="0,5,0,0"/>
+                    <!-- Muted text color -->
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Software Description -->
+            <Border Background="#2B2B2B" CornerRadius="8" Padding="30" Margin="0,0,0,20" BorderBrush="#2B2B2B" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Welcome to EDPA" FontSize="20" FontWeight="Bold" Foreground="#8B2E31" Margin="0,0,0,15"/>
+                    <TextBlock Text="Your Companion for Profitable Piracy Operations" FontSize="16" FontWeight="SemiBold" Foreground="#FFE2E8F0" Margin="0,0,0,10"/>
+
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="EDPA is a specialized tool for Elite Dangerous commanders who engage in piracy. It analyzes star systems to identify the most lucrative and strategically advantageous targets by fetching data from galactic databases and applying a sophisticated scoring algorithm." 
+                                   Foreground="#BFBFBF" TextWrapping="Wrap" FontSize="14" LineHeight="18" Margin="0,0,0,10"/>
+
+                        <TextBlock Text="Key Features:" FontWeight="Bold" Foreground="#FFE2E8F0" Margin="0,10,0,5"/>
+                        <TextBlock Text="• System Scoring: Evaluates economy, government, security, and more" Foreground="#BFBFBF" Margin="20,2,0,2"/>
+                        <TextBlock Text="• Distance-Based Search: Find optimal systems near your location" Foreground="#BFBFBF" Margin="20,2,0,2"/>
+                        <TextBlock Text="• Performance Cache: Speeds up repeated searches significantly" Foreground="#BFBFBF" Margin="20,2,0,2"/>
+                        <TextBlock Text="• Spansh Integration: Direct links to detailed system information" Foreground="#BFBFBF" Margin="20,2,0,2"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Getting Started -->
+            <Border Background="#2B2B2B" CornerRadius="8" Padding="30" BorderBrush="#2B2B2B" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Getting Started" FontSize="18" FontWeight="Bold" Foreground="#8B2E31" Margin="0,0,0,10"/>
+                    <TextBlock Text="1. Use the navigation panel to access the System Search tool" Foreground="#BFBFBF" Margin="0,3,0,3"/>
+                    <TextBlock Text="2. Set your current reference system and maximum search distance" Foreground="#BFBFBF" Margin="0,3,0,3"/>
+                    <TextBlock Text="3. Let EDPA analyze and score nearby systems for piracy potential" Foreground="#BFBFBF" Margin="0,3,0,3"/>
+                    <TextBlock Text="4. Review the results and save your findings for future reference" Foreground="#BFBFBF" Margin="0,3,0,3"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
 </Page>

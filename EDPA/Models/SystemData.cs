@@ -6,6 +6,7 @@ namespace EDPA.Models
     {
         // Essential properties for scoring
         public string Name { get; set; }
+        public long Id { get; set; }
         public string Security { get; set; }
         public long Population { get; set; }
         public string Economy { get; set; }

@@ -16,6 +16,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Assets\EDPALogoCroped.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Assets\EDPALogoCroped.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
 	  <Resource Include="Assets\favicon.ico" />
 	</ItemGroup>
 
@@ -24,6 +31,7 @@
      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3485.44" />
      <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
      <PackageReference Include="WPF-UI" Version="4.0.3" />
    </ItemGroup>

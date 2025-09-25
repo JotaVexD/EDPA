@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.DirectoryServices;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -40,6 +41,7 @@ namespace EDPA.WPF.Views.Pages
         private bool _isInitialized = false;
         private static SearchSystem _instance;
 
+
         public static SearchSystem Instance => _instance;
 
         public SearchSystem()
@@ -67,7 +69,7 @@ namespace EDPA.WPF.Views.Pages
                 _resultsView.SortDescriptions.Add(new SortDescription("FinalScore", ListSortDirection.Descending));
 
                 ResultsListView.SelectedItem = null;
-                ResultsListView.ItemsSource = _resultsView;
+                ResultsListView.ItemsSource = ApplicationStateService.Instance.CurrentPageResults;
 
                 await InitializeServicesAsync();
                 _isInitialized = true;
@@ -79,21 +81,38 @@ namespace EDPA.WPF.Views.Pages
 
         private void UpdateUIState()
         {
-            ResultsListView.SelectedItem = null;
-            // Update button states based on current results
-            ExportButton.IsEnabled = ApplicationStateService.Instance.SearchResults.Count > 0;
-            ClearResultsButton.IsEnabled = ApplicationStateService.Instance.SearchResults.Count > 0;
+            Dispatcher.InvokeAsync(() =>
+            {
+                ResultsListView.SelectedItem = null;
 
-            // Update status label
-            if (ApplicationStateService.Instance.SearchResults.Count > 0)
-            {
-                var bestSystem = ApplicationStateService.Instance.SearchResults.OrderByDescending(r => r.FinalScore).First();
-                StatusLabel.Text = $"Found {ApplicationStateService.Instance.SearchResults.Count} results. Best system: {bestSystem.SystemName} ({bestSystem.FinalScore:F2}/100)";
-            }
-            else
-            {
-                StatusLabel.Text = "Ready to search.";
-            }
+                // Update pagination info in status
+                var totalResults = ApplicationStateService.Instance.SearchResults.Count;
+                var currentPage = ApplicationStateService.Instance.CurrentPage;
+                var totalPages = ApplicationStateService.Instance.TotalPages;
+                var pageSize = ApplicationStateService.Instance.PageSize;
+
+                if (totalResults > 0)
+                {
+                    var startIndex = (currentPage - 1) * pageSize + 1;
+                    var endIndex = Math.Min(currentPage * pageSize, totalResults);
+                    var bestSystem = ApplicationStateService.Instance.SearchResults.OrderByDescending(r => r.FinalScore).First();
+
+                    ResultsListView.ItemsSource = ApplicationStateService.Instance.CurrentPageResults;
+
+                    StatusLabel.Text = $"Showing {startIndex}-{endIndex} of {totalResults} results. Best system: {bestSystem.SystemName} ({bestSystem.FinalScore:F2}/100)";
+                    PageCount.Text = $"Page {currentPage}/{totalPages}";
+
+                }
+                else
+                {
+                    ResultsListView.ItemsSource = null;
+                    StatusLabel.Text = "Ready to search.";
+                }
+
+                // Update button states
+                ExportButton.IsEnabled = totalResults > 0;
+                ClearResultsButton.IsEnabled = totalResults > 0;
+            });
         }
 
         private async Task InitializeServicesAsync()
@@ -175,6 +194,7 @@ namespace EDPA.WPF.Views.Pages
                 int maxDistance = (int)MaxDistanceSlider.Value;
 
                 ApplicationStateService.Instance.ReferenceSystem = referenceSystem;
+                ApplicationStateService.Instance.TotalSearches += 1;
                 ApplicationStateService.Instance.MaxDistance = maxDistance;
                 ApplicationStateService.Instance.SearchResults.Clear();
 
@@ -193,7 +213,7 @@ namespace EDPA.WPF.Views.Pages
                 var scoredSystems = await _cacheService.GetOrCreateAsync(
                     cacheKey,
                     async () => await FetchAndScoreSystems(referenceSystem, maxDistance),
-                    TimeSpan.FromHours(24)
+                    TimeSpan.FromHours(12)
                 );
 
                 if (scoredSystems != null && scoredSystems.Count > 0)
@@ -346,8 +366,9 @@ namespace EDPA.WPF.Views.Pages
 
         private void ClearResultsButton_Click(object sender, RoutedEventArgs e)
         {
-            ApplicationStateService.Instance.SearchResults.Clear();
-            ApplicationStateService.Instance.systemData.Clear();
+            ApplicationStateService.Instance.ClearAllData();
+
+            // Force refresh the view
             _resultsView.Refresh();
 
             SnackbarHelper.ShowInfo("Results cleared. Ready to search.");
@@ -426,5 +447,28 @@ namespace EDPA.WPF.Views.Pages
                 }
             }
         }
+
+        private void PrevPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            ApplicationStateService.Instance.PreviousPage();
+            UpdateUIState();
+        }
+
+        private void NextPageButton_Click(object sender, RoutedEventArgs e)
+        {
+            ApplicationStateService.Instance.NextPage();
+            UpdateUIState();
+        }
+
+        private void PageSizeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PageSizeComboBox.SelectedItem is ComboBoxItem item && int.TryParse(item.Content.ToString(), out int pageSize))
+            {
+                ApplicationStateService.Instance.PageSize = pageSize;
+                ApplicationStateService.Instance.GoToPage(1); // Reset to first page
+                UpdateUIState();
+            }
+        }
+
     }
 }

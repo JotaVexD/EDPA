@@ -180,6 +180,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Results Header -->
@@ -196,7 +197,8 @@
                     Padding="8"
                     BorderThickness="1"
                     BorderBrush="{StaticResource FallbackBorder}"
-                    Height="400">
+                    Height="400
+                    ">
                 <!-- Fixed height to enable internal scrolling -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ui:ListView
@@ -267,12 +269,53 @@
                     </ui:ListView>
                 </ScrollViewer>
             </Border>
+            <Border Grid.Row="2"
+                    Height="30"
+                    Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ui:Button x:Name="PreviousPage" 
+                        Icon="{ui:SymbolIcon ArrowLeft24}"
+                        Grid.Column="0"
+                        HorizontalAlignment="Right"
+                        Width="40"
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Click="PrevPageButton_Click"/>
+                    <TextBlock Text="Page 1/1" x:Name="PageCount"
+                        Grid.Column="1"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="16" 
+                        FontWeight="SemiBold"
+                        Margin="0,0,0,0"
+                        Foreground="{StaticResource FallbackForeground}"/>
+                    <ui:Button x:Name="NextPage" 
+                        Icon="{ui:SymbolIcon ArrowRight24}"
+                        Grid.Column="2"
+                        HorizontalAlignment="Left"
+                        Width="40"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Click="NextPageButton_Click"/>
+                    <ComboBox x:Name="PageSizeComboBox" 
+                        Margin="0,0" Width="80" Height="40" Grid.Column="2"
+                        HorizontalAlignment="Right"
+                         SelectionChanged="PageSizeComboBox_SelectionChanged">
+                        <ComboBoxItem Content="25" IsSelected="True"/>
+                        <ComboBoxItem Content="50"/>
+                        <ComboBoxItem Content="100"/>
+                    </ComboBox>
+                </Grid>
+            </Border>
         </Grid>
 
         <!-- Status Bar -->
-        <Border Grid.Row="4" 
-                Margin="0,16,0,0"
-                Padding="0,8">
+        <Border Grid.Row="4">
             <Grid>
                 <TextBlock x:Name="StatusLabel"
                            Text="Ready to search."

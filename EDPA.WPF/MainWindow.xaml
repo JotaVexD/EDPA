@@ -44,7 +44,7 @@
         <ui:NavigationView x:Name="MainFrame" Grid.Row="1" PaneDisplayMode="LeftFluent">
             <ui:NavigationView.Header>
                 <ui:BreadcrumbBar
-                    Margin="42,32,0,0"
+                    Margin="0,0,0,0"
                     FontSize="28"
                     FontWeight="DemiBold" />
             </ui:NavigationView.Header>

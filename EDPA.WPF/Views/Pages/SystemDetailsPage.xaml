@@ -72,21 +72,51 @@
             </Grid.RowDefinitions>
             <!-- Navigation Header -->
             <Border Grid.Row="0" Background="{StaticResource FallbackCardBackground}" Padding="16,12">
-                <StackPanel Orientation="Horizontal">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
                     <ui:Button 
                         Icon="{ui:SymbolIcon ArrowLeft24}"
+                        Grid.Column="0"
                         Content="Back to Search"
                         Click="BackButton_Click"
                         Margin="0,0,16,0"
                         Appearance="Secondary"/>
                     <TextBlock 
                         Text="{Binding SystemName, StringFormat='System Details: {0}'}"
+                        Grid.Column="1"
+                        HorizontalAlignment="Left"
                         FontSize="20"
                         FontWeight="SemiBold"
                         VerticalAlignment="Center"
                         Foreground="{StaticResource FallbackForeground}"/>
                     <ui:Button
+                        x:Name="Copy"
+                        HorizontalAlignment="Right"
+                        Grid.Column="2"
+                        Icon="{ui:SymbolIcon Copy24}"
+                        Content=""
+                        Click="CopyButton_Click"
+                        Appearance="Secondary"
+                        Margin="10,0,0,0"/>
+                    <ui:Button
+                        x:Name="OpenInara"
+                        HorizontalAlignment="Right"
+                        Grid.Column="3"
+                        Icon="{ui:SymbolIcon Open28}"
+                        Content=""
+                        Click="ViewInInaraButton_Click"
+                        Appearance="Secondary"
+                        Margin="10,0,0,0"/>
+                    <ui:Button
                         x:Name="SaveButton"
+                        HorizontalAlignment="Right"
+                        Grid.Column="4"
                         Icon="{ui:SymbolIcon Save28}"
                         Content=""
                         Click="SaveButton_Click"
@@ -94,15 +124,19 @@
                         Margin="30,0,0,0"/>
                     <ui:TextBlock 
                         x:Name="AlreadySavedText"
+                        Grid.Column="4"
+                        HorizontalAlignment="Right"
                         FontSize="20"
                         Text="Already Saved"
                         VerticalAlignment="Center"
-                        Margin="30,0,30,0"
+                        Margin="0,0,50,0"
                         Foreground="{StaticResource FallbackForeground}"
                         Visibility="Collapsed"/>
                     <!-- Optional: Remove Button for saved systems -->
                     <ui:Button x:Name="RemoveButton"
                         Icon="{ui:SymbolIcon Delete24}"
+                        Grid.Column="4"
+                        HorizontalAlignment="Right"
                         Content=""
                         Click="RemoveButton_Click"
                         Appearance="Secondary"
@@ -114,7 +148,7 @@
                         Margin="0,0,10,0"
                         Visibility="Collapsed"/>
 
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- System Details Content -->
@@ -122,9 +156,9 @@
                 <StackPanel Background="Transparent">
                     <!-- Basic Information Card -->
                     <Border Background="{StaticResource FallbackCardBackground}" 
-                CornerRadius="4" 
-                Padding="16"
-                Margin="0,0,0,16">
+                        CornerRadius="4" 
+                        Padding="16"
+                        Margin="0,0,0,16">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <ui:SymbolIcon Symbol="Info24" 

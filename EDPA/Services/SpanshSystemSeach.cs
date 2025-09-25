@@ -201,6 +201,8 @@ namespace EDPA.Services
             if (systemElement.TryGetProperty("name", out var nameElement))
                 systemData.Name = nameElement.GetString() ?? string.Empty;
 
+            systemData.Id = GetInt64Property(systemElement, "id64",0);
+
             systemData.Security = GetStringProperty(systemElement, "security");
             systemData.Population = GetInt64Property(systemElement, "population", 0);
             systemData.Economy = GetStringProperty(systemElement, "primary_economy");
